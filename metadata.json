@@ -1,0 +1,6 @@
+{
+  "name": "WarFeed Live - US, Israel & Iran Conflict Radar",
+  "description": "Live Instagram-style OSINT intel feed and instant Tzeva Adom red alert missile warning system for the US, Israel and Iran conflict.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
