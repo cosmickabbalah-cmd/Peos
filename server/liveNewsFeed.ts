@@ -1048,6 +1048,262 @@ const DYNAMIC_DISPATCHES_POOL: Record<string, Array<{
       sourceUrl: 'https://www.reuters.com/world/',
       regionTag: 'international'
     }
+  ],
+  mako: [
+    {
+      headlineEs: 'Mako Noticias (Canal 12): El Gabinete de Seguridad concluye consulta urgente sobre defensa aérea multicapa en la Kirya',
+      headlineEn: 'Mako News (Channel 12): Security Cabinet concludes emergency defense consultation on multi-tier air shields in the Kirya',
+      headlineFr: 'Mako Actualités (Chaîne 12) : Le cabinet de sécurité conclut une consultation d’urgence à la Kirya',
+      headlineHe: 'חדשות 12 / מאקו: הקבינט סיים התייעצות ביטחונית מקיפה בקריה על היערכות מערך ההגנה האווירית',
+      captionEs: 'Reporte Mako N12: El corresponsal militar Nir Dvori confirma que las baterías Hetz 3, David\'s Sling y Cúpula de Hierro mantienen alerta operacional plena en todo el territorio.',
+      captionEn: 'Mako N12 Report: Chief military analyst Nir Dvori confirms Arrow 3, David\'s Sling, and Iron Dome batteries maintain 24/7 interception readiness across all sectors.',
+      captionFr: 'Rapport Mako N12 : Le correspondant militaire Nir Dvori confirme la veille continue de l’ensemble des systèmes de défense antimissile.',
+      captionHe: 'כתבנו הצבאי ניר דבורי מוסר כי מערכות החץ, קלע דוד וכיפת ברזל ערוכות לספק התרעה מיידית.',
+      captionOrig: 'דיווח מיוחד בחדשות 12 מאקו: הקבינט הביטחוני השלים התייעצות דחופה על מוכנות מערך ההגנה האווירית.',
+      langOrig: 'he',
+      tags: ['#Mako', '#N12', '#Kirya', '#DefensaAérea', '#Israel'],
+      threatCategory: 'INTERCEPTION',
+      sourceUrl: 'https://www.mako.co.il/news-israel',
+      regionTag: 'center'
+    },
+    {
+      headlineEs: 'Mako N12: Autoridades portuarias y energéticas de Israel activan protocolos de contingencia preventiva en Haifa y Ashdod',
+      headlineEn: 'Mako N12: Israeli port and energy infrastructure authorities activate contingency protocols in Haifa and Ashdod',
+      headlineFr: 'Mako N12 : Les autorités portuaires et énergétiques d’Israël renforcent les mesures de sécurité à Haïfa et Ashdod',
+      headlineHe: 'מאקו חדשות: נמלי חיפה ואשדוד ומתקני האנרגיה פועלים תחת נוהל אבטחה והגנה מוגבר',
+      captionEs: 'Despacho Mako: Equipos técnicos aseguran la continuidad operativa del suministro eléctrico y las rutas logísticas de importación marítima.',
+      captionEn: 'Mako Dispatch: Technical teams ensure uninterrupted power grid performance and commercial sea freight corridor protection.',
+      captionFr: 'Dépêche Mako : Les équipes techniques garantissent la continuité de la fourniture énergétique et des corridors logistiques.',
+      captionHe: 'צוותי החירום של חברת החשמל ונמלי הים מאבטחים את הרציפות התפקודית של המשק הישראלי.',
+      captionOrig: 'מאקו: רשויות התשתית הלאומיות מדווחות על פעילות סדירה ומאובטחת בנמלים ובתחנות הכוח.',
+      langOrig: 'he',
+      tags: ['#Mako', '#Haifa', '#Ashdod', '#Infraestructuras', '#Energía'],
+      threatCategory: 'DEFENSE',
+      sourceUrl: 'https://www.mako.co.il/news-dailynews',
+      regionTag: 'north'
+    }
+  ],
+  ch13: [
+    {
+      headlineEs: 'Canal 13 Noticias: Alon Ben-David revela nuevos datos de inteligencia sobre la dispersión de lanzadores de misiles en bases subterráneas',
+      headlineEn: 'Channel 13 News: Alon Ben-David reports fresh intelligence data on mobile missile launcher dispersion into underground tunnels',
+      headlineFr: 'Chaîne 13 Infos : Alon Ben-David révèle de nouvelles données sur la dispersion des lanceurs de missiles souterrains',
+      headlineHe: 'חדשות 13: אלון בן דוד חושף פרטי מודיעין על פיזור משגרי הטילים של האויב במנהרות תת-קרקעיות',
+      captionEs: 'Exclusiva Canal 13: La Fuerza Aérea mantiene aviones en cabina listos para responder ante cualquier señal de disparo balístico inminente.',
+      captionEn: 'Channel 13 Exclusive: Israeli strike formations remain on tarmac alert ready to counter any detected ballistic ignition.',
+      captionFr: 'Exclusivité Chaîne 13 : Les escadrons de chasseurs restent en alerte immédiate pour parer à tout tir balistique.',
+      captionHe: 'טייסי הקרב של חיל האוויר נמצאים בכוננות מיידית בדת"קים לסכל כל ניסיון שיגור.',
+      captionOrig: 'פרסום בלעדי בחדשות 13: הפרשן הצבאי אלון בן דוד מדווח על היערכות חיל האוויר מול משגרי הטילים.',
+      langOrig: 'he',
+      tags: ['#Canal13', '#Reshet13', '#AlonBenDavid', '#Inteligencia', '#FuerzaAérea'],
+      threatCategory: 'GEOINT',
+      sourceUrl: 'https://13tv.co.il/news/news-flash/',
+      regionTag: 'national'
+    },
+    {
+      headlineEs: 'Noticias Canal 13: Banco de Israel y Ministerio de Finanzas confirman solidez de reservas en divisas extranjeras',
+      headlineEn: 'Channel 13 News: Bank of Israel and Finance Ministry confirm robust foreign currency reserve buffers',
+      headlineFr: 'Chaîne 13 : La Banque d’Israël et le ministère des Finances confirment la solidité des réserves en devises',
+      headlineHe: 'חדשות 13 כלכלה: בנק ישראל ומשרד האוצר מדווחים על יציבות המשק ורזרבות מט"ח איתנות',
+      captionEs: 'Economía en Canal 13: Los mercados financieros mantienen estabilidad operativa con más de 215.000 millones de dólares en reservas de liquidez.',
+      captionEn: 'Channel 13 Economy: Israeli financial markets maintain orderly operation supported by over $215B in central bank reserves.',
+      captionFr: 'Économie Chaîne 13 : Les marchés financiers israéliens restent stables avec plus de 215 milliards de réserves.',
+      captionHe: 'נגיד בנק ישראל מדגיש כי עתודות המטבע מעניקות חוסן מלא לכלכלה הישראלית.',
+      captionOrig: 'חדשות 13: בנק ישראל מציג נתונים המעידים על חוסנו הכלכלי של המשק ורמת נזילות גבוהה.',
+      langOrig: 'he',
+      tags: ['#Canal13', '#Economía', '#Shekel', '#Finanzas'],
+      threatCategory: 'ECONOMY',
+      sourceUrl: 'https://13tv.co.il/',
+      regionTag: 'center'
+    }
+  ],
+  i24news: [
+    {
+      headlineEs: 'i24NEWS En Vivo: Escuadrones F-35I Adir y F-15I completan vuelos de patrulla continua sobre el Mediterráneo oriental',
+      headlineEn: 'i24NEWS Live: F-35I Adir & F-15I squadrons complete continuous combat air patrols over eastern Mediterranean',
+      headlineFr: 'i24NEWS en direct : Les escadrons F-35I et F-15I achèvent des patrouilles continues en Méditerranée orientale',
+      headlineHe: 'i24NEWS שידור חי: מטוסי אדיר F-35I ורעם F-15I השלימו טיסות פטרול והגנה במזרח הים התיכון',
+      captionEs: 'Despacho i24NEWS: Mandos de la Fuerza Aérea destacan que la interoperabilidad con buques de radar de EE.UU. asegura un escudo hermético.',
+      captionEn: 'i24NEWS Dispatch: Air Force commanders emphasize that joint radar data links with U.S. Aegis ships maintain a sealed defensive perimeter.',
+      captionFr: 'Dépêche i24NEWS : L’interopérabilité radar avec la marine américaine garantit un bouclier hermétique.',
+      captionHe: 'מפקדי חיל האוויר מציינים כי התיאום מול הצי האמריקני מספק כיסוי מכ"מי מלא.',
+      captionOrig: 'i24NEWS: Israeli Air Force fighter jet squadrons conclude persistent deterrence sweeps along maritime approaches.',
+      langOrig: 'en',
+      tags: ['#i24NEWS', '#FuerzaAérea', '#F35I', '#Mediterráneo', '#Deterrence'],
+      threatCategory: 'INTERCEPTION',
+      sourceUrl: 'https://www.i24news.tv/en/news/israel',
+      regionTag: 'national'
+    },
+    {
+      headlineEs: 'i24NEWS Internacional: Alianzas de defensa regional en el Mar Rojo interceptan drones hostiles en rutas marítimas',
+      headlineEn: 'i24NEWS International: Regional maritime defense coalition neutralizes hostile drones over Red Sea transit lanes',
+      headlineFr: 'i24NEWS International : La coalition maritime neutralise des drones hostiles en mer Rouge',
+      headlineHe: 'i24NEWS: קואליציית ההגנה הימית בים סוף יירטה בהצלחה כטב"מים עוינים מעל נתיבי שיט בינלאומיים',
+      captionEs: 'Seguridad Marítima: Buques de guerra aliados escoltan buques mercantes garantizando el tránsito ininterrumpido hacia el puerto de Eilat.',
+      captionEn: 'Maritime Security: Allied warships escort container traffic safeguarding uninterrupted trade towards Eilat port.',
+      captionFr: 'Sécurité maritime : Des navires de guerre escortent les navires marchands vers le port d’Eilat.',
+      captionHe: 'ספינות טילים מאבטחות את חופש השיט ואת המעבר הבטוח לנמל אילת.',
+      captionOrig: 'i24NEWS: Maritime security forces thwart drone attempts threatening Red Sea trade corridors.',
+      langOrig: 'en',
+      tags: ['#i24NEWS', '#MarRojo', '#Eilat', '#SeguridadNaval'],
+      threatCategory: 'NAVAL',
+      sourceUrl: 'https://www.i24news.tv/en',
+      regionTag: 'south'
+    }
+  ],
+  cnn: [
+    {
+      headlineEs: 'CNN Breaking: El Pentágono confirma despliegue reforzado de baterías THAAD y destructores Aegis en apoyo a Israel',
+      headlineEn: 'CNN Breaking: Pentagon confirms reinforced deployment of THAAD batteries and Aegis destroyers supporting Israel',
+      headlineFr: 'CNN Breaking : Le Pentagone confirme le renforcement des batteries THAAD et destroyers Aegis',
+      headlineHe: 'CNN מבזק מיוחד: הפנטגון מאשר תגבור סוללות THAAD ומשחתות טילים להגנה על שמי ישראל',
+      captionEs: 'Reporte Exclusivo de CNN: Fuentes del Departamento de Defensa confirmaron que los sistemas de radar AN/TPY-2 operan en sincronización directa con el mando de las FDI.',
+      captionEn: 'CNN Exclusive Report: Defense officials confirm AN/TPY-2 radar systems are operating in direct data link with Israeli Home Front Command.',
+      captionFr: 'Exclusivité CNN : Les radars AN/TPY-2 opèrent en liaison directe avec le commandement israélien.',
+      captionHe: 'גורמי הגנה אמריקנים מוסרים כי מכ"ם THAAD מסונכרן ישירות מול מערכות היירוט הישראליות.',
+      captionOrig: 'CNN EXCLUSIVE: Pentagon officials confirm THAAD radar networks operate in unified telemetry with Israeli defense batteries.',
+      langOrig: 'en',
+      tags: ['#CNN', '#Pentágono', '#THAAD', '#Aegis', '#Defensa'],
+      threatCategory: 'INTERCEPTION',
+      sourceUrl: 'https://edition.cnn.com/middle-east',
+      regionTag: 'international'
+    },
+    {
+      headlineEs: 'CNN Política: La Casa Blanca y el Congreso ratifican paquete de suministro expedito de misiles interceptores Tamir y Hetz',
+      headlineEn: 'CNN Politics: White House & Congress ratify expedited resupply package for Tamir and Arrow interceptors',
+      headlineFr: 'CNN Politique : La Maison Blanche et le Congrès ratifient le réapprovisionnement accéléré en intercepteurs',
+      headlineHe: 'CNN: הבית הלבן והקונגרס מאשרים משלוח חירום מואץ של מיירטי טמיר וחץ לישראל',
+      captionEs: 'Washington: Líderes demócratas y republicanos destacan que la seguridad y protección de la población civil israelí es un compromiso bipartidista prioritario.',
+      captionEn: 'Washington: Bipartisan congressional leaders reaffirm that protecting Israeli civilians against rocket barrages remains a top priority.',
+      captionFr: 'Washington : Les dirigeants bipartisans réaffirment que la protection des civils israéliens reste une priorité absolue.',
+      captionHe: 'מנהיגי שתי המפלגות בוושינגטון מדגישים את המחויבות להגנת אזרחי ישראל.',
+      captionOrig: 'CNN: Bipartisan congressional leaders push through expedited interceptor missile production line agreements.',
+      langOrig: 'en',
+      tags: ['#CNN', '#CasaBlanca', '#Congreso', '#CúpulaDeHierro'],
+      threatCategory: 'DIPLOMACY',
+      sourceUrl: 'https://edition.cnn.com/',
+      regionTag: 'international'
+    }
+  ],
+  foxnews: [
+    {
+      headlineEs: 'Fox News Alerta: Grupo de Combate de portaaviones de EE.UU. mantiene vigilancia aeronaval ininterrumpida las 24 horas',
+      headlineEn: 'Fox News Alert: U.S. Carrier Strike Group maintains 24/7 continuous combat air patrol vigilance',
+      headlineFr: 'Alerte Fox News : Le groupe aéronaval américain assure une veille aérienne continue 24h/24',
+      headlineHe: 'פוקס ניוז מבזק: נושאת המטוסים האמריקנית וכוחות הליווי מקיימים פטרול אווירי רצוף 24 שעות ביממה',
+      captionEs: 'Fox News Defensa: Oficiales de la Armada confirmaron que cazas F/A-18E Super Hornet y radares de alerta temprana E-2D protegen el espacio aéreo regional.',
+      captionEn: 'Fox News Defense: Naval officers confirmed F/A-18E Super Hornets and E-2D Hawkeye radar planes provide continuous regional surveillance.',
+      captionFr: 'Défense Fox News : Les Super Hornet et avions radars E-2D assurent une surveillance continue.',
+      captionHe: 'מטוסי קרב אמריקניים ומטוסי ביון עוקבים מקרוב אחר כל תנועה חשודה באזור.',
+      captionOrig: 'FOX NEWS ALERT: U.S. Navy Carrier Strike Group maintains round-the-clock air defense readiness in the region.',
+      langOrig: 'en',
+      tags: ['#FoxNews', '#USNavy', '#Portaaviones', '#DefensaNaval'],
+      threatCategory: 'NAVAL',
+      sourceUrl: 'https://www.foxnews.com/category/world/world-regions/middle-east/israel',
+      regionTag: 'international'
+    },
+    {
+      headlineEs: 'Fox News: Mandos militares elogian la efectividad multicapa del escudo de defensa antimisiles de Israel',
+      headlineEn: 'Fox News: Military commanders praise multi-layered effectiveness of Israel’s integrated missile shield',
+      headlineFr: 'Fox News : Les commandants militaires saluent l’efficacité multicouche du bouclier antimissile d’Israël',
+      headlineHe: 'פוקס ניוז: מומחים צבאיים בארה"ב משבחים את מערך ההגנה הרב-שכבתי של ישראל כמתקדם בעולם',
+      captionEs: 'Análisis Militar: La integración de Cúpula de Hierro, David\'s Sling y Arrow 3 representa la arquitectura de defensa más avanzada del mundo.',
+      captionEn: 'Military Analysis: The seamless integration of Iron Dome, David\'s Sling, and Arrow 3 constitutes the most capable missile defense architecture on earth.',
+      captionFr: 'Analyse militaire : L’intégration du Dôme de fer, de la Fronde de David et du système Arrow représente la défense la plus perfectionnée au monde.',
+      captionHe: 'ניתוח ביטחוני: השילוב בין כיפת ברזל, קלע דוד וחץ מציב רף עולמי בהגנה על ריכוזי אוכלוסייה.',
+      captionOrig: 'Fox News: Defense analysts underscore unprecedented interception success rate of Israeli layered shields.',
+      langOrig: 'en',
+      tags: ['#FoxNews', '#IronDome', '#Arrow3', '#Hetz', '#Israel'],
+      threatCategory: 'INTERCEPTION',
+      sourceUrl: 'https://www.foxnews.com/',
+      regionTag: 'national'
+    }
+  ],
+  bbc: [
+    {
+      headlineEs: 'BBC News: Informe especial sobre la preparación tecnológica y civil de Israel ante alertas en tiempo real',
+      headlineEn: 'BBC News: Special report on Israel’s cutting-edge civil defense and real-time early warning technologies',
+      headlineFr: 'BBC News : Reportage spécial sur les technologies d’alerte précoce et la préparation civile en Israël',
+      headlineHe: 'BBC דיווח מיוחד: כיצד טכנולוגיות ההתרעה המהירות של ישראל שומרות על חיי האזרחים בעורף',
+      captionEs: 'BBC Corresponsalía: La red celular Cell Broadcast y los refugios blindados Mamad permiten proteger a millones de residentes en segundos.',
+      captionEn: 'BBC Correspondent: The national cell-broadcast alert infrastructure and reinforced safe rooms protect millions within seconds.',
+      captionFr: 'Correspondance BBC : L’infrastructure d’alerte cellulaire et les abris protégés sauvent des vies en quelques secondes.',
+      captionHe: 'כתב ה-BBC בירושלים מדווח על היעילות של שידורי ההתרעה הסלולריים וההיענות האזרחית.',
+      captionOrig: 'BBC News: How Israel’s advanced mobile early-warning network saves lives within seconds.',
+      langOrig: 'en',
+      tags: ['#BBC', '#Tecnología', '#SeguridadCivil', '#PikudHaOref'],
+      threatCategory: 'DEFENSE',
+      sourceUrl: 'https://www.bbc.com/news/topics/c207p54m43qt',
+      regionTag: 'national'
+    },
+    {
+      headlineEs: 'BBC Internacional: Intensas gestiones diplomáticas en Ginebra y Londres buscan desescalar tensiones en Medio Oriente',
+      headlineEn: 'BBC International: Intensive diplomatic contacts in Geneva and London seek regional de-escalation',
+      headlineFr: 'BBC International : Négociations diplomatiques intenses à Genève et Londres pour désamorcer les tensions',
+      headlineHe: 'BBC: מאמצים דיפלומטיים אינטנסיביים בלונדון ובז\'נבה לשמירה על היציבות האזורית',
+      captionEs: 'Diplomacia Europea: Ministros de Exteriores europeos coordinan medidas de contención para evitar afectaciones al comercio marítimo global.',
+      captionEn: 'European Diplomacy: European foreign ministers coordinate maritime safety initiatives safeguarding international commerce.',
+      captionFr: 'Diplomatie européenne : Les ministres coordonnent des mesures de sécurisation des voies commerciales.',
+      captionHe: 'מגעים דיפלומטיים באירופה למניעת פגיעה בנתיבי הסחר הימי.',
+      captionOrig: 'BBC World: Intensive diplomatic corridors activated in European capitals seeking regional stabilization.',
+      langOrig: 'en',
+      tags: ['#BBC', '#Diplomacia', '#Londres', '#Ginebra'],
+      threatCategory: 'DIPLOMACY',
+      sourceUrl: 'https://www.bbc.com/news',
+      regionTag: 'international'
+    }
+  ],
+  reuters: [
+    {
+      headlineEs: 'Reuters: Envíos comerciales en el Estrecho de Ormuz y Bab el-Mandeb operan con protección y escolta naval continua',
+      headlineEn: 'Reuters: Commercial shipping corridors in Hormuz and Bab el-Mandeb operate under continuous warship escort',
+      headlineFr: 'Reuters : La navigation commerciale sous protection navale continue dans le détroit d’Ormuz et Bab el-Mandeb',
+      headlineHe: 'רויטרס: תנועת האוניות במצרי הורמוז ובאב אל-מנדב מתנהלת תחת אבטחה ימית צמודה',
+      captionEs: 'Despacho Reuters: Aseguradoras navales y armadas internacionales reportan tránsito regular de buques mercantes escoltados por fragatas de defensa aérea.',
+      captionEn: 'Reuters Dispatch: Maritime insurers and coalition navies confirm commercial tankers and container carriers transit safely under frigate escort.',
+      captionFr: 'Dépêche Reuters : Les assureurs et marines internationales confirment le transit sécurisé des navires marchands.',
+      captionHe: 'רויטרס מדווחת כי צי ספינות הקרב מלווה אוניות סחר ומבטיח את פתיחות נתיבי האנרגיה.',
+      captionOrig: 'REUTERS DISPATCH: International naval task forces maintain uninterrupted escort corridors for merchant maritime shipping.',
+      langOrig: 'en',
+      tags: ['#Reuters', '#Petróleo', '#ComercioMarítimo', '#Ormuz', '#Seguridad'],
+      threatCategory: 'NAVAL',
+      sourceUrl: 'https://www.reuters.com/world/middle-east/',
+      regionTag: 'international'
+    },
+    {
+      headlineEs: 'Reuters: Empresas de alta tecnología de Israel captan más de 1.800 millones de dólares en rondas de financiación en Tel Aviv',
+      headlineEn: 'Reuters: Israeli high-tech startups raise over $1.8B in foreign venture capital rounds in Tel Aviv',
+      headlineFr: 'Reuters : Les startups de la tech israélienne lèvent plus de 1,8 milliard de dollars à Tel-Aviv',
+      headlineHe: 'רויטרס כלכלה: חברות ההייטק הישראליות גייסו מעל 1.8 מיליארד דולר בהשקעות זרות',
+      captionEs: 'Economía de Innovación: Fondos globales de capital de riesgo renuevan su confianza en las startups de ciberseguridad, semiconductores e inteligencia artificial de Israel.',
+      captionEn: 'Innovation Economy: Global venture capital funds reaffirm strong confidence in Israeli cybersecurity, semiconductor, and AI innovators.',
+      captionFr: 'Économie de l’innovation : Les fonds d’investissement réaffirment leur confiance dans les startups israéliennes.',
+      captionHe: 'משקיעים בינלאומיים ממשיכים להזרים הון לסטארט-אפים הישראליים בתחומי הסייבר וה-AI.',
+      captionOrig: 'Reuters: Global venture capital continues robust inflows into Israeli cybersecurity and artificial intelligence firms.',
+      langOrig: 'en',
+      tags: ['#Reuters', '#HighTech', '#Startups', '#TelAviv', '#Economía'],
+      threatCategory: 'ECONOMY',
+      sourceUrl: 'https://www.reuters.com/',
+      regionTag: 'center'
+    }
+  ],
+  telegram: [
+    {
+      headlineEs: 'Comando del Frente Doméstico (Pikud HaOref): Red nacional de sirenas y radiodifusión celular opera sin novedades en cielo despejado',
+      headlineEn: 'Home Front Command: National siren network and cell broadcast systems operate normally under calm skies',
+      headlineFr: 'Commandement du front intérieur : Le réseau national de sirènes et d’alertes opère normalement',
+      headlineHe: 'פיקוד העורף: מערכות ההתרעה הארציות ושידורי הסלולר פועלים כשורה, השמיים שקטים',
+      captionEs: 'Comunicado Oficial de Seguridad Civil: Se recuerda a la población mantener activadas las notificaciones en sus dispositivos móviles y conocer el refugio blindado asignado.',
+      captionEn: 'Civil Defense Official Notice: Citizens are advised to keep device notifications active and verify their nearest reinforced shelter space.',
+      captionFr: 'Avis officiel : Les citoyens sont invités à maintenir leurs notifications actives et à localiser leur abri le plus proche.',
+      captionHe: 'הודעת פיקוד העורף: הציבור מתבקש לשמור על דריכות ולהקפיד על הנחיות הביטחון.',
+      captionOrig: 'פיקוד העורף: מערך ההתרעה הלאומי פועל במוכנות מלאה. שקט בכל הגזרות.',
+      langOrig: 'he',
+      tags: ['#PikudHaOref', '#TzevaAdom', '#SeguridadCivil', '#Tranquilidad'],
+      threatCategory: 'DEFENSE',
+      sourceUrl: 'https://www.tzevaadom.co.il/',
+      regionTag: 'national'
+    }
   ]
 };
 
@@ -1195,7 +1451,7 @@ export async function handleLiveNewsCheck(
     }
 
     // If all RSS posts for this specific target channel have been seen, generate fresh dynamic post!
-    if (!candidatePost && (normalizedTarget === 'standwithus' || normalizedTarget === 'iran' || normalizedTarget === 'internacional' || normalizedTarget === 'international')) {
+    if (!candidatePost) {
       const channelKey = normalizedTarget === 'international' ? 'internacional' : normalizedTarget;
       candidatePost = generateDynamicChannelPost(channelKey, now);
       activeChannel = MONITORED_CHANNELS.find((c) => c.id === channelKey) || activeChannel;
@@ -1224,6 +1480,12 @@ export async function handleLiveNewsCheck(
         }
       }
       if (candidatePost) break;
+    }
+
+    if (!candidatePost) {
+      const roundRobinChannel = MONITORED_CHANNELS[rotationIndex % MONITORED_CHANNELS.length].id;
+      candidatePost = generateDynamicChannelPost(roundRobinChannel, now);
+      activeChannel = MONITORED_CHANNELS.find((c) => c.id === roundRobinChannel) || MONITORED_CHANNELS[0];
     }
   }
 

@@ -327,17 +327,56 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     return `${dateStr} - ${timeStr}`;
   };
 
-  const formatOfficialTimestamp = (timestamp: string, lang: AppLanguage) => {
+  const formatOfficialTimestamp = (postOrTimestamp: string | FeedPost, lang: AppLanguage) => {
+    let raw = '';
+    let createdAt: number | undefined;
+
+    if (typeof postOrTimestamp === 'object' && postOrTimestamp !== null) {
+      raw = postOrTimestamp.timestamp || '';
+      createdAt = postOrTimestamp.createdAt;
+    } else {
+      raw = postOrTimestamp || '';
+    }
+
+    // 1. Look for existing clock hour in format HH:MM (e.g. "12:35")
+    const clockMatch = raw.match(/(\d{1,2}:\d{2})/);
+    let timeStr = clockMatch ? clockMatch[1] : '';
+
+    // 2. If no clock time found, derive from createdAt
+    if (!timeStr && createdAt && typeof createdAt === 'number' && createdAt > 0) {
+      const d = new Date(createdAt);
+      timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    // 3. If relative string like "Hace 3m", "Hace 11m", "11m ago", calculate the official clock hour
+    if (!timeStr && raw) {
+      const minMatch = raw.match(/(\d+)\s*m/i);
+      const hourMatch = raw.match(/(\d+)\s*h/i);
+      let minsAgo = 0;
+      if (hourMatch) minsAgo += parseInt(hourMatch[1], 10) * 60;
+      if (minMatch) minsAgo += parseInt(minMatch[1], 10);
+      if (minsAgo > 0) {
+        const d = new Date(Date.now() - minsAgo * 60000);
+        timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+    }
+
+    // 4. Default fallback to current time
+    if (!timeStr) {
+      const d = new Date();
+      timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
     if (lang === 'he') {
-      return timestamp.replace('(Hora oficial)', '(שעה רשמית)');
+      return `פורסם: ${timeStr} (שעה רשמית)`;
     }
     if (lang === 'en') {
-      return timestamp.replace('(Hora oficial)', '(Official time)');
+      return `Published: ${timeStr} (Official time)`;
     }
     if (lang === 'fr') {
-      return timestamp.replace('(Hora oficial)', '(Heure officielle)');
+      return `Publié à : ${timeStr} (Heure officielle)`;
     }
-    return timestamp;
+    return `Publicado: ${timeStr} (Hora oficial)`;
   };
 
   // Function to run the 2-minute periodic channel check
@@ -497,10 +536,38 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
 
   const displayedPosts = filteredPosts.slice(0, visibleCount);
 
-  const handleSelectOutlet = (outletId: string) => {
+  const handleSelectOutlet = async (outletId: string) => {
     alertAudio.playLikeChime();
     setSelectedOutlet(outletId);
+    setSelectedCategory('all');
     setVisibleCount(15);
+
+    // Instant channel update when user clicks a specific channel tab
+    if (outletId !== 'all') {
+      try {
+        const result = await fetchLatestNews(posts, outletId);
+        if (result.hasNew && result.newPosts.length > 0 && onAddNewPosts) {
+          const currentKeys = new Set([
+            ...posts.map((p) => p.id.toLowerCase()),
+            ...posts.map((p) => getNewsCanonicalKey(p))
+          ]);
+          const uniqueNew = result.newPosts.filter(
+            (p) => !currentKeys.has(p.id.toLowerCase()) && !currentKeys.has(getNewsCanonicalKey(p))
+          );
+          if (uniqueNew.length > 0) {
+            onAddNewPosts(uniqueNew);
+            const newIds = new Set(uniqueNew.map((p) => p.id));
+            setHighlightedPostIds(newIds);
+            setTimeout(() => setHighlightedPostIds(new Set()), 10000);
+            const channelName = uniqueNew[0].authorName || 'Canal';
+            setToastMessage(`✓ ${channelName}: Nueva noticia en este canal`);
+            setTimeout(() => setToastMessage(null), 4000);
+          }
+        }
+      } catch {
+        // quiet ignore
+      }
+    }
   };
 
   const handleLoadMore = () => {
@@ -1065,7 +1132,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                       className="text-neutral-300 font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800"
                       title={appLanguage === 'he' ? "שעה מדויקת של פרסום באתר הרשמי" : "Hora exacta de publicación en el medio oficial"}
                     >
-                      {formatOfficialTimestamp(post.timestamp, appLanguage)}
+                      {formatOfficialTimestamp(post, appLanguage)}
                     </span>
 
                     {/* Visible indicator that this is the most recent dispatch */}
@@ -1213,7 +1280,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                           </span>
                           <span className="text-neutral-600">·</span>
                           <span className="text-sky-400/90 font-mono text-[10px]">
-                            {formatOfficialTimestamp(post.timestamp, appLanguage)}
+                            {formatOfficialTimestamp(post, appLanguage)}
                           </span>
                         </div>
                         <p className="text-white font-medium text-xs truncate group-hover:text-sky-300 transition-colors">
