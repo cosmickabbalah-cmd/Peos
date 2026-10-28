@@ -202,7 +202,7 @@ export async function fetchLatestNews(
     { channelId: 'internacional', channelName: 'Internacionales & Diplomacia', icon: '🌍', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'standwithus', channelName: 'StandWithUs (WhatsApp & Web)', icon: '🇮🇱', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'mako', channelName: 'Mako Noticias (N12 Israel)', icon: '🔴', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
-    { channelId: 'ch13', channelName: 'Noticias Canal 13 (חדשות 13)', icon: '📺', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
+    { channelId: 'ch13', channelName: 'Noticias Canal 13 (Reshet 13)', icon: '📺', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'i24news', channelName: 'i24NEWS Israel & World', icon: '🌐', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'bbc', channelName: 'BBC News Israel', icon: '🇬🇧', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'cnn', channelName: 'CNN Israel & Middle East', icon: '🇺🇸', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },

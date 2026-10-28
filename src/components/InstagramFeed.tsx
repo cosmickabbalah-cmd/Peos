@@ -51,8 +51,8 @@ const OUTLET_FILTERS = [
   { id: 'iran', label: 'Irán', labelEn: 'Iran', labelFr: 'Iran', labelHe: 'איראן', domain: 'iran', icon: '🇮🇷' },
   { id: 'internacional', label: 'Internacionales', labelEn: 'International', labelFr: 'International', labelHe: 'בינלאומי', domain: 'international', icon: '🌍' },
   { id: 'standwithus', label: 'StandWithUs', domain: 'standwithus.com', icon: '🇮🇱' },
-  { id: 'mako', label: 'Mako (N12)', domain: 'mako.co.il', icon: '🔴' },
-  { id: 'ch13', label: 'חדשות 13', domain: '13tv.co.il', icon: '📺' },
+  { id: 'mako', label: 'Mako (N12)', labelEn: 'Mako (N12)', labelFr: 'Mako (N12)', labelHe: 'מאקו (חדשות 12)', domain: 'mako.co.il', icon: '🔴' },
+  { id: 'ch13', label: 'Canal 13', labelEn: 'Channel 13', labelFr: 'Chaîne 13', labelHe: 'חדשות 13', domain: '13tv.co.il', icon: '📺' },
   { id: 'i24news', label: 'i24NEWS', domain: 'i24news.tv', icon: '🌐' },
   { id: 'bbc', label: 'BBC News', domain: 'bbc.com', icon: '🇬🇧' },
   { id: 'cnn', label: 'CNN', domain: 'cnn.com', icon: '🇺🇸' },
@@ -1193,41 +1193,6 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                     <p className="leading-relaxed">
                       {content.analysis}
                     </p>
-                  </div>
-                )}
-
-                {/* StandWithUs WhatsApp Official Channel & Website Quick Access */}
-                {(post.whatsappUrl || post.sourceOutlet === 'standwithus' || post.authorName.includes('StandWithUs')) && (
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-600/50 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                        <span className="text-sm">💬</span>
-                        <span>Canal Oficial de WhatsApp & Web de StandWithUs</span>
-                      </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-200 border border-emerald-700/60">
-                        Canal Verificado
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <a
-                        href={post.whatsappUrl || "https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
-                      >
-                        <span>Unirse en WhatsApp</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                      <a
-                        href={post.sourceUrl || "https://www.standwithus.com/"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-semibold border border-neutral-700 transition-colors"
-                      >
-                        <Globe className="w-3.5 h-3.5 text-sky-400" />
-                        <span>Sitio Web Oficial</span>
-                      </a>
-                    </div>
                   </div>
                 )}
 

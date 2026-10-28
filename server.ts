@@ -265,7 +265,7 @@ const MONITORED_CHANNELS: MonitoredChannel[] = [
   },
   {
     id: 'ch13',
-    name: 'Noticias Canal 13 (חדשות 13)',
+    name: 'Noticias Canal 13 (Reshet 13)',
     handle: 'reshet13_noticias',
     icon: '📺',
     badgeType: 'MILITARY',
@@ -789,7 +789,7 @@ function generateSequentialNews(channelId: 'mako' | 'ch13' | 'i24news' | 'cnn' |
       return {
         id: `srv-dyn-ch13-${seq}-${Date.now()}`,
         channelId: 'ch13',
-        authorName: 'Noticias Canal 13 (חדשות 13)',
+        authorName: 'Noticias Canal 13 (Reshet 13)',
         authorHandle: 'reshet13_noticias',
         authorAvatar: '📺',
         verified: true,
@@ -917,7 +917,7 @@ function generateSequentialNews(channelId: 'mako' | 'ch13' | 'i24news' | 'cnn' |
       return {
         id: `srv-dyn-alert-${seq}-${Date.now()}`,
         channelId: 'telegram',
-        authorName: 'Tzeva Adom / פיקוד העורף',
+        authorName: 'Tzeva Adom (Alerta Roja)',
         authorHandle: 'tzeva_adom_live',
         authorAvatar: '🚨',
         verified: true,

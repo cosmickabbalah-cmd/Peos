@@ -21,7 +21,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🇮🇷'
     },
     {
-      title: 'Mako חדשות ישראל (N12 News)',
+      title: 'Mako Noticias Israel (N12 News)',
       description: 'Portal principal de noticias de Israel y Canal 12. Cobertura en vivo con Nir Dvori y corresponsales en la Kirya.',
       url: 'https://www.mako.co.il/news-dailynews',
       badge: 'mako.co.il',
@@ -37,7 +37,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🌐'
     },
     {
-      title: 'חדשות 13 (Reshet 13 Israel)',
+      title: 'Canal 13 Noticias (Reshet 13 Israel)',
       description: 'Cadena de televisión de Israel con análisis militar especializado de Alon Ben-David y Or Heller.',
       url: 'https://13tv.co.il/news/news-flash/',
       badge: '13tv.co.il',
@@ -85,7 +85,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🚨'
     },
     {
-      title: 'Canal Telegram: התרעות על שיגורים',
+      title: 'Canal Telegram: Alertas de Misiles (Tzeva Adom)',
       description: 'Canal oficial verificado en Telegram con notificaciones push instantáneas en milisegundos tras cada activación de sirena.',
       url: 'https://t.me/s/tzevaadom',
       badge: 't.me/tzevaadom',

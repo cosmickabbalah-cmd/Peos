@@ -637,6 +637,7 @@ export default function App() {
         <StoryViewerModal
           stories={stories}
           initialIndex={storyViewerIndex}
+          appLanguage={appLanguage}
           onClose={() => setStoryViewerIndex(null)}
         />
       )}

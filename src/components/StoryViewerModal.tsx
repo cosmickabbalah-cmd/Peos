@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Send, Heart, ShieldCheck, MapPin } from 'lucide-react';
-import type { StoryItem } from '../types';
+import type { StoryItem, AppLanguage } from '../types';
 import { alertAudio } from '../utils/soundEffects';
 
 interface StoryViewerModalProps {
   stories: StoryItem[];
   initialIndex: number;
+  appLanguage?: AppLanguage;
   onClose: () => void;
 }
 
 export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({
   stories,
   initialIndex,
+  appLanguage = 'es',
   onClose
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -21,6 +23,24 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({
   const [reactionSent, setReactionSent] = useState<string | null>(null);
 
   const currentStory = stories[currentIndex];
+
+  const storyTitle =
+    appLanguage === 'he'
+      ? currentStory.titleHe || currentStory.title
+      : appLanguage === 'en'
+      ? currentStory.titleEn || currentStory.titleEs || currentStory.title
+      : appLanguage === 'fr'
+      ? currentStory.titleFr || currentStory.titleEs || currentStory.title
+      : currentStory.titleEs || currentStory.title;
+
+  const storyCaption =
+    appLanguage === 'he'
+      ? currentStory.captionHe || currentStory.caption
+      : appLanguage === 'en'
+      ? currentStory.captionEn || currentStory.captionEs || currentStory.caption
+      : appLanguage === 'fr'
+      ? currentStory.captionFr || currentStory.captionEs || currentStory.caption
+      : currentStory.captionEs || currentStory.caption;
 
   // Auto advance story progress
   useEffect(() => {
@@ -186,8 +206,8 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({
           {/* Story text caption */}
           <div className="bg-black/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 text-xs text-white leading-relaxed space-y-2">
             <div>
-              <p className="font-semibold text-rose-300 mb-1">{currentStory.title}</p>
-              <p>{currentStory.caption}</p>
+              <p className="font-semibold text-rose-300 mb-1">{storyTitle}</p>
+              <p>{storyCaption}</p>
             </div>
             {currentStory.whatsappUrl && (
               <div className="pt-1 flex items-center gap-2">
