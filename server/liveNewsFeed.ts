@@ -36,6 +36,20 @@ export const MONITORED_CHANNELS: ChannelMeta[] = [
     defaultLocation: 'Teherán / Jerusalén / Kirya'
   },
   {
+    id: 'internacional',
+    name: 'Internacionales & Diplomacia',
+    handle: 'global_israel_diplomacy',
+    icon: '🌍',
+    badgeType: 'OSINT',
+    outletUrl: 'https://www.reuters.com/world/',
+    rssUrls: [
+      'https://news.google.com/rss/search?q=when:48h+Israel+diplomacy+OR+summit+OR+UN+OR+Washington&hl=en-US&gl=US&ceid=US:en',
+      'https://news.google.com/rss/search?q=when:48h+Israel+international+relations&hl=en-US&gl=US&ceid=US:en',
+      'https://feeds.bbci.co.uk/news/world/rss.xml'
+    ],
+    defaultLocation: 'Washington / Bruselas / ONU Nueva York'
+  },
+  {
     id: 'standwithus',
     name: 'StandWithUs (WhatsApp & Web)',
     handle: 'standwithus_live',
@@ -788,6 +802,66 @@ export function isIranRelatedPost(post: FeedPost): boolean {
   );
 }
 
+export function isInternationalRelatedPost(post: FeedPost): boolean {
+  if (post.sourceOutlet === 'internacional' || post.sourceOutlet === 'international') return true;
+  if (post.threatCategory === 'DIPLOMACY' || post.threatCategory === 'GLOBAL' || post.regionTag === 'international') return true;
+  const text = [
+    post.headline,
+    post.headlineEs,
+    post.headlineEn,
+    post.headlineFr,
+    post.headlineHe,
+    post.captionEs,
+    post.captionEn,
+    post.captionFr,
+    post.captionHe,
+    post.captionOrig,
+    ...(post.tacticalTags || []),
+    post.location,
+    post.authorName
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    text.includes('internacional') ||
+    text.includes('international') ||
+    text.includes('בינלאומי') ||
+    text.includes('diplomacia') ||
+    text.includes('diplomacy') ||
+    text.includes('דיפלומטיה') ||
+    text.includes('onu') ||
+    text.includes('united nations') ||
+    text.includes('naciones unidas') ||
+    text.includes('consejo de seguridad') ||
+    text.includes('un security council') ||
+    text.includes('ee.uu') ||
+    text.includes('estados unidos') ||
+    text.includes('united states') ||
+    text.includes('washington') ||
+    text.includes('pentagon') ||
+    text.includes('pentágono') ||
+    text.includes('centcom') ||
+    text.includes('white house') ||
+    text.includes('casa blanca') ||
+    text.includes('unión europea') ||
+    text.includes('european union') ||
+    text.includes('bruselas') ||
+    text.includes('g7') ||
+    text.includes('otan') ||
+    text.includes('nato') ||
+    text.includes('emiratos') ||
+    text.includes('abraham') ||
+    text.includes('la haya') ||
+    text.includes('icj') ||
+    text.includes('biden') ||
+    text.includes('trump') ||
+    text.includes('macron') ||
+    text.includes('starmer')
+  );
+}
+
 const DYNAMIC_DISPATCHES_POOL: Record<string, Array<{
   headlineEs: string;
   headlineEn: string;
@@ -924,6 +998,56 @@ const DYNAMIC_DISPATCHES_POOL: Record<string, Array<{
       sourceUrl: 'https://www.i24news.tv/en/tags/iran',
       regionTag: 'national'
     }
+  ],
+  internacional: [
+    {
+      headlineEs: 'Consejo de Seguridad de la ONU y coalición internacional: Reafirman el derecho soberano a la defensa y anuncian sanciones a milicias regionales',
+      headlineEn: 'UN Security Council & international coalition: Reaffirm sovereign right to defense and announce sanctions on regional militias',
+      headlineFr: "Conseil de sécurité de l'ONU et coalition internationale : Réaffirmation du droit à l'autodéfense et sanctions contre les milices",
+      headlineHe: 'מועצת הביטחון של האו"ם והקואליציה הבינלאומית: אישור זכות ההגנה העצמית וסנקציות חדשות',
+      captionEs: 'Despacho Diplomático desde Nueva York: Delegaciones aliadas consolidan un frente multilateral unificado para salvaguardar la seguridad de los civiles y el orden internacional.',
+      captionEn: 'Diplomatic Dispatch from New York: Allied envoys establish a unified multilateral framework ensuring civilian security and international order.',
+      captionFr: "Dépêche diplomatique de New York : Les grandes démocraties forment un front uni pour garantir la sécurité civile.",
+      captionHe: 'דוח דיפלומטי מניו יורק: שגרירי המעצמות מדגישים את שיתוף הפעולה הבינלאומי להגנה על ישראל.',
+      captionOrig: 'UN Security Council allied delegations reaffirm legitimate defense principles and target hostile weapons trafficking.',
+      langOrig: 'en',
+      tags: ['#Internacionales', '#ONU', '#Diplomacia', '#Seguridad', '#Alianza'],
+      threatCategory: 'DIPLOMACY',
+      sourceUrl: 'https://www.reuters.com/world/',
+      regionTag: 'international'
+    },
+    {
+      headlineEs: 'Pentágono y Aliados de la OTAN: Amplían el corredor de defensa aeronaval conjunto y radar compartido en el Mediterráneo',
+      headlineEn: 'Pentagon & NATO Allies: Expand joint air-maritime defense corridor and shared radar telemetry in the Mediterranean',
+      headlineFr: "Le Pentagone et l'OTAN : Extension du corridor de défense aéro-maritime et radars partagés en Méditerranée",
+      headlineHe: 'הפנטגון ובעלות ברית בנאט"ו: הרחבת מסדרון ההגנה האווירי והימי ורשת המכ"מים בים התיכון',
+      captionEs: 'Cooperación Militar Aliada: El Comando Europeo y CENTCOM sincronizan radares de alerta temprana y destructores con misiles interceptores guiados en enlace directo.',
+      captionEn: 'Allied Military Cooperation: European Command and CENTCOM integrate Aegis early warning sensors in live telemetry with regional defense bases.',
+      captionFr: "Coopération militaire alliée : Intégration en direct des capteurs Aegis et systèmes de défense précoce.",
+      captionHe: 'שיתוף פעולה צבאי: תיאום מבצעי מלא של משחתות טילים ומכ"מי מעקב מתקדמים.',
+      captionOrig: 'Pentagon and NATO defense networks expand joint sensor telemetry and interceptor protection over the region.',
+      langOrig: 'en',
+      tags: ['#Internacionales', '#Pentágono', '#CENTCOM', '#OTAN', '#Defensa'],
+      threatCategory: 'DIPLOMACY',
+      sourceUrl: 'https://edition.cnn.com/middle-east',
+      regionTag: 'international'
+    },
+    {
+      headlineEs: 'Cumbre de Bruselas: Ministros de Exteriores del G7 acuerdan nuevo bloqueo unánime a redes financieras y suministros balísticos',
+      headlineEn: 'Brussels Summit: G7 Foreign Ministers finalize comprehensive sanctions targeting missile and drone financial networks',
+      headlineFr: "Sommet de Bruxelles : Les ministres du G7 finalisent des sanctions globales contre les réseaux financiers d'armement",
+      headlineHe: 'פסגת בריסל: שרי החוץ של ה-G7 סיכמו על סנקציות מקיפות נגד רשתות המימון של מערכי הטילים והכטב"מים',
+      captionEs: 'Acuerdo Económico Internacional: Medidas vinculantes cierran el acceso a transferencias bancarias y restringen componentes de doble uso para la industria militar hostil.',
+      captionEn: 'International Economic Agreement: Binding pact blocks cross-border capital flows and dual-use aerospace components.',
+      captionFr: "Accord économique international : Blocage financier et restrictions strictes sur les composants aérospatiaux sensibles.",
+      captionHe: 'הסכם בינלאומי בבריסל: סנקציות כלכליות נוקשות ואיסור ייצוא רכיבים טכנולוגיים רגישים.',
+      captionOrig: 'G7 foreign ministers reach landmark consensus on economic sanctions restricting hostile weapons supply chains.',
+      langOrig: 'en',
+      tags: ['#Internacionales', '#G7', '#UniónEuropea', '#Bruselas', '#EconomíaGlobal'],
+      threatCategory: 'DIPLOMACY',
+      sourceUrl: 'https://www.reuters.com/world/',
+      regionTag: 'international'
+    }
   ]
 };
 
@@ -1054,10 +1178,27 @@ export async function handleLiveNewsCheck(
       }
     }
 
+    // If normalizedTarget is 'internacional' or 'international', check all cached posts for international items
+    if (!candidatePost && (normalizedTarget === 'internacional' || normalizedTarget === 'international')) {
+      for (const [, posts] of livePostsCache.entries()) {
+        for (const post of posts) {
+          const pId = post.id.toLowerCase();
+          const pFp = canonicalFingerprint(post.captionOrig || post.headlineEs || '');
+          if (!knownSet.has(pId) && !knownSet.has(pFp) && isInternationalRelatedPost(post)) {
+            candidatePost = post;
+            activeChannel = MONITORED_CHANNELS.find((c) => c.id === 'internacional') || activeChannel;
+            break;
+          }
+        }
+        if (candidatePost) break;
+      }
+    }
+
     // If all RSS posts for this specific target channel have been seen, generate fresh dynamic post!
-    if (!candidatePost && (normalizedTarget === 'standwithus' || normalizedTarget === 'iran')) {
-      candidatePost = generateDynamicChannelPost(normalizedTarget, now);
-      activeChannel = MONITORED_CHANNELS.find((c) => c.id === normalizedTarget) || activeChannel;
+    if (!candidatePost && (normalizedTarget === 'standwithus' || normalizedTarget === 'iran' || normalizedTarget === 'internacional' || normalizedTarget === 'international')) {
+      const channelKey = normalizedTarget === 'international' ? 'internacional' : normalizedTarget;
+      candidatePost = generateDynamicChannelPost(channelKey, now);
+      activeChannel = MONITORED_CHANNELS.find((c) => c.id === channelKey) || activeChannel;
     }
   } else {
     // Check channels round-robin so standwithus, iran, mako, etc. all get fair updates!

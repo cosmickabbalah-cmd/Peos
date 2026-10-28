@@ -49,6 +49,7 @@ interface InstagramFeedProps {
 const OUTLET_FILTERS = [
   { id: 'all', label: 'Todos', labelEn: 'All Sources', labelFr: 'Toutes les sources', labelHe: 'כל המקורות', icon: '🌐' },
   { id: 'iran', label: 'Irán', labelEn: 'Iran', labelFr: 'Iran', labelHe: 'איראן', domain: 'iran', icon: '🇮🇷' },
+  { id: 'internacional', label: 'Internacionales', labelEn: 'International', labelFr: 'International', labelHe: 'בינלאומי', domain: 'international', icon: '🌍' },
   { id: 'standwithus', label: 'StandWithUs', domain: 'standwithus.com', icon: '🇮🇱' },
   { id: 'mako', label: 'Mako (N12)', domain: 'mako.co.il', icon: '🔴' },
   { id: 'ch13', label: 'חדשות 13', domain: '13tv.co.il', icon: '📺' },
@@ -61,6 +62,7 @@ const OUTLET_FILTERS = [
 
 const ISRAEL_SEARCH_SUGGESTIONS = [
   { label: '🇮🇷 Irán / Alertas', query: 'Irán' },
+  { label: '🌍 Internacionales / Diplomacia', query: 'Internacional' },
   { label: '🇮🇱 StandWithUs', query: 'StandWithUs' },
   { label: '💬 WhatsApp Oficial', query: 'WhatsApp' },
   { label: '🗳️ Elecciones 2026', query: 'Elecciones' },
@@ -176,6 +178,67 @@ export function isIranRelatedPost(post: FeedPost): boolean {
     text.includes('ghadr') ||
     text.includes('arrow 3') ||
     text.includes('חץ 3')
+  );
+}
+
+export function isInternationalRelatedPost(post: FeedPost): boolean {
+  if (post.sourceOutlet === 'internacional' || post.sourceOutlet === 'international') return true;
+  if (post.threatCategory === 'DIPLOMACY' || post.threatCategory === 'GLOBAL' || post.regionTag === 'international') return true;
+
+  const text = [
+    post.headline,
+    post.headlineEs,
+    post.headlineEn,
+    post.headlineFr,
+    post.headlineHe,
+    post.captionEs,
+    post.captionEn,
+    post.captionFr,
+    post.captionHe,
+    post.captionOrig,
+    ...(post.tacticalTags || []),
+    post.location,
+    post.authorName
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    text.includes('internacional') ||
+    text.includes('international') ||
+    text.includes('בינלאומי') ||
+    text.includes('diplomacia') ||
+    text.includes('diplomacy') ||
+    text.includes('דיפלומטיה') ||
+    text.includes('onu') ||
+    text.includes('naciones unidas') ||
+    text.includes('united nations') ||
+    text.includes('consejo de seguridad') ||
+    text.includes('un security council') ||
+    text.includes('ee.uu') ||
+    text.includes('estados unidos') ||
+    text.includes('united states') ||
+    text.includes('washington') ||
+    text.includes('pentagon') ||
+    text.includes('pentágono') ||
+    text.includes('centcom') ||
+    text.includes('white house') ||
+    text.includes('casa blanca') ||
+    text.includes('unión europea') ||
+    text.includes('european union') ||
+    text.includes('bruselas') ||
+    text.includes('g7') ||
+    text.includes('otan') ||
+    text.includes('nato') ||
+    text.includes('emiratos') ||
+    text.includes('abraham') ||
+    text.includes('la haya') ||
+    text.includes('icj') ||
+    text.includes('biden') ||
+    text.includes('trump') ||
+    text.includes('macron') ||
+    text.includes('starmer')
   );
 }
 
@@ -402,6 +465,8 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
       matchesOutlet = true;
     } else if (selectedOutlet === 'iran') {
       matchesOutlet = isIranRelatedPost(post);
+    } else if (selectedOutlet === 'internacional' || selectedOutlet === 'international') {
+      matchesOutlet = isInternationalRelatedPost(post);
     } else if (selectedOutlet === 'standwithus') {
       matchesOutlet =
         post.sourceOutlet === 'standwithus' ||

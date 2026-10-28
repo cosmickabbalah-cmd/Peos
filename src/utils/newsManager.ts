@@ -199,6 +199,7 @@ export async function fetchLatestNews(
 
   const fallbackChannelsReport: ChannelCheckReport[] = [
     { channelId: 'iran', channelName: 'Irán & Alertas Estratégicas', icon: '🇮🇷', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
+    { channelId: 'internacional', channelName: 'Internacionales & Diplomacia', icon: '🌍', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'standwithus', channelName: 'StandWithUs (WhatsApp & Web)', icon: '🇮🇱', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'mako', channelName: 'Mako Noticias (N12 Israel)', icon: '🔴', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'ch13', channelName: 'Noticias Canal 13 (חדשות 13)', icon: '📺', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
