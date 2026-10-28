@@ -1075,12 +1075,12 @@ function evaluateChannelUpdates(knownIdsSet: Set<string>, knownKeysSet: Set<stri
 // API: Check Channel by Channel Endpoint (POST with full JSON payload)
 app.post('/api/feed/check-channels', async (req: Request, res: Response) => {
   try {
-    const { knownIds = [], knownKeys = [], targetOutlet = 'all' } = req.body || {};
+    const { knownIds = [], knownKeys = [], targetOutlet = 'all', clientTimeMs } = req.body || {};
     const allKnown = [
       ...(Array.isArray(knownIds) ? knownIds : []),
       ...(Array.isArray(knownKeys) ? knownKeys : [])
     ];
-    const result = await handleLiveNewsCheck(allKnown, targetOutlet);
+    const result = await handleLiveNewsCheck(allKnown, targetOutlet, clientTimeMs);
     res.json(result);
   } catch (err: any) {
     console.error('Error in /api/feed/check-channels:', err);

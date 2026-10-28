@@ -223,7 +223,8 @@ export async function fetchLatestNews(
       body: JSON.stringify({
         knownIds: Array.from(knownIds),
         knownKeys: Array.from(knownKeys),
-        targetOutlet
+        targetOutlet,
+        clientTimeMs: Date.now()
       }),
       signal: controller.signal
     });
@@ -235,6 +236,13 @@ export async function fetchLatestNews(
 
       if (data && data.hasNew && Array.isArray(data.newPosts) && data.newPosts.length > 0) {
         const candidate = data.newPosts[0] as FeedPost;
+        const nowMs = Date.now();
+        const d = new Date(nowMs);
+        const hh = d.getHours().toString().padStart(2, '0');
+        const mm = d.getMinutes().toString().padStart(2, '0');
+        candidate.createdAt = nowMs;
+        candidate.timestamp = `${hh}:${mm} (Hora oficial)`;
+
         const candidateId = candidate.id.toLowerCase();
         const candidateKey = getNewsCanonicalKey(candidate);
 

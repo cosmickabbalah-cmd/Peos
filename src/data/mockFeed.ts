@@ -1,6 +1,6 @@
 import type { FeedPost, StoryItem } from '../types';
 
-export const INITIAL_STORIES: StoryItem[] = [
+const RAW_INITIAL_STORIES: StoryItem[] = [
   {
     id: 'story-standwithus',
     author: 'StandWithUs',
@@ -148,7 +148,7 @@ export const INITIAL_STORIES: StoryItem[] = [
   }
 ];
 
-export const INITIAL_POSTS: FeedPost[] = [
+const RAW_INITIAL_POSTS: FeedPost[] = [
   {
     id: 'post-intl-un-security-council',
     authorName: 'Consejo de Seguridad & Diplomacia Global',
@@ -1284,3 +1284,42 @@ export const INITIAL_POSTS: FeedPost[] = [
     comments: []
   }
 ];
+
+/**
+ * Dynamically synchronizes post timestamps and createdAt so news ALWAYS reflects
+ * the current real-time clock when the app loads (e.g. at 7:00 PM / 19:00 it shows 19:xx, never 12:xx PM).
+ */
+export function synchronizePostsWithCurrentTime(posts: FeedPost[]): FeedPost[] {
+  const now = Date.now();
+  return posts.map((post, idx) => {
+    // Stagger posts from right now backwards (e.g. 1m ago, 4m ago, 8m ago, 13m ago...)
+    const minsAgo = Math.min(idx * 3 + 1, 480);
+    const postCreatedAt = now - minsAgo * 60 * 1000;
+    const d = new Date(postCreatedAt);
+    const hh = d.getHours().toString().padStart(2, '0');
+    const mm = d.getMinutes().toString().padStart(2, '0');
+    return {
+      ...post,
+      createdAt: postCreatedAt,
+      timestamp: `${hh}:${mm} (Hora oficial)`
+    };
+  });
+}
+
+export function synchronizeStoriesWithCurrentTime(stories: StoryItem[]): StoryItem[] {
+  const now = Date.now();
+  return stories.map((story, idx) => {
+    const minsAgo = Math.min(idx * 4 + 2, 240);
+    const d = new Date(now - minsAgo * 60 * 1000);
+    const hh = d.getHours().toString().padStart(2, '0');
+    const mm = d.getMinutes().toString().padStart(2, '0');
+    return {
+      ...story,
+      time: `${hh}:${mm} (Hora oficial)`
+    };
+  });
+}
+
+export const INITIAL_STORIES: StoryItem[] = synchronizeStoriesWithCurrentTime(RAW_INITIAL_STORIES);
+export const INITIAL_POSTS: FeedPost[] = synchronizePostsWithCurrentTime(RAW_INITIAL_POSTS);
+

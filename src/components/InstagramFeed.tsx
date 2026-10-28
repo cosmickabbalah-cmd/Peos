@@ -338,17 +338,23 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
       raw = postOrTimestamp || '';
     }
 
-    // 1. Look for existing clock hour in format HH:MM (e.g. "12:35")
-    const clockMatch = raw.match(/(\d{1,2}:\d{2})/);
-    let timeStr = clockMatch ? clockMatch[1] : '';
+    let timeStr = '';
 
-    // 2. If no clock time found, derive from createdAt
-    if (!timeStr && createdAt && typeof createdAt === 'number' && createdAt > 0) {
+    // 1. ABSOLUTE PRIORITY: Format post.createdAt directly into the user's local browser clock time
+    if (createdAt && typeof createdAt === 'number' && createdAt > 0) {
       const d = new Date(createdAt);
       timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     }
 
-    // 3. If relative string like "Hace 3m", "Hace 11m", "11m ago", calculate the official clock hour
+    // 2. If no valid createdAt, extract clock hour in format HH:MM from raw string
+    if (!timeStr && raw) {
+      const clockMatch = raw.match(/(\d{1,2}:\d{2})/);
+      if (clockMatch) {
+        timeStr = clockMatch[1];
+      }
+    }
+
+    // 3. If relative string like "Hace 3m", "Hace 11m", "11m ago", calculate from current time
     if (!timeStr && raw) {
       const minMatch = raw.match(/(\d+)\s*m/i);
       const hourMatch = raw.match(/(\d+)\s*h/i);

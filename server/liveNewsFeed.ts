@@ -1363,7 +1363,8 @@ function generateDynamicChannelPost(channelId: string, now: Date): FeedPost {
  */
 export async function handleLiveNewsCheck(
   knownIds: string[] = [],
-  targetOutlet: string = 'all'
+  targetOutlet: string = 'all',
+  clientTimeMs?: number
 ): Promise<{
   success: boolean;
   hasNew: boolean;
@@ -1374,7 +1375,7 @@ export async function handleLiveNewsCheck(
   auditSummary: string;
   timestamp: string;
 }> {
-  const now = new Date();
+  const now = clientTimeMs && clientTimeMs > 0 ? new Date(clientTimeMs) : new Date();
   const nowIso = now.toISOString();
   const hh = now.getHours().toString().padStart(2, '0');
   const mm = now.getMinutes().toString().padStart(2, '0');
