@@ -13,6 +13,14 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🇮🇱'
     },
     {
+      title: 'Irán & Alertas Estratégicas (FDI & CENTCOM)',
+      description: 'Monitoreo 24/7 de vectores balísticos, silos subterráneos del CGRI, actividad nuclear y coordinación defensiva de las baterías Hetz-3 y THAAD.',
+      url: 'https://www.i24news.tv/en/tags/iran',
+      badge: 'i24news.tv/iran',
+      badgeColor: 'border-purple-800 bg-purple-950 text-purple-300',
+      icon: '🇮🇷'
+    },
+    {
       title: 'Mako חדשות ישראל (N12 News)',
       description: 'Portal principal de noticias de Israel y Canal 12. Cobertura en vivo con Nir Dvori y corresponsales en la Kirya.',
       url: 'https://www.mako.co.il/news-dailynews',

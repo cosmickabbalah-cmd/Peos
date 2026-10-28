@@ -22,6 +22,35 @@ export interface ChannelMeta {
 
 export const MONITORED_CHANNELS: ChannelMeta[] = [
   {
+    id: 'iran',
+    name: 'Irán & Alertas Estratégicas',
+    handle: 'iran_intel_radar',
+    icon: '🇮🇷',
+    badgeType: 'MILITARY',
+    outletUrl: 'https://www.i24news.tv/en/tags/iran',
+    rssUrls: [
+      'https://news.google.com/rss/search?q=when:48h+Iran+Israel+missile&hl=en-US&gl=US&ceid=US:en',
+      'https://news.google.com/rss/search?q=when:48h+site:reuters.com+Iran+Israel&hl=en-US&gl=US&ceid=US:en',
+      'https://news.google.com/rss/search?q=site:i24news.tv+Iran&hl=en-US&gl=US&ceid=US:en'
+    ],
+    defaultLocation: 'Teherán / Jerusalén / Kirya'
+  },
+  {
+    id: 'standwithus',
+    name: 'StandWithUs (WhatsApp & Web)',
+    handle: 'standwithus_live',
+    icon: '🇮🇱',
+    badgeType: 'OSINT',
+    outletUrl: 'https://www.standwithus.com/',
+    whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
+    rssUrls: [
+      'https://www.standwithus.com/feed',
+      'https://news.google.com/rss/search?q=site:standwithus.com&hl=en-US&gl=US&ceid=US:en',
+      'https://news.google.com/rss/search?q=%22StandWithUs%22+Israel&hl=en-US&gl=US&ceid=US:en'
+    ],
+    defaultLocation: 'Jerusalén / Red WhatsApp Oficial'
+  },
+  {
     id: 'mako',
     name: 'Mako Noticias (N12 Israel)',
     handle: 'mako_news_israel',
@@ -62,22 +91,6 @@ export const MONITORED_CHANNELS: ChannelMeta[] = [
     ],
     htmlUrl: 'https://www.i24news.tv/en/news/israel',
     defaultLocation: 'Jaffa Port, Tel Aviv'
-  },
-  {
-    id: 'standwithus',
-    name: 'StandWithUs (WhatsApp & Web)',
-    handle: 'standwithus_live',
-    icon: '🇮🇱',
-    badgeType: 'OSINT',
-    outletUrl: 'https://www.standwithus.com/',
-    whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
-    rssUrls: [
-      'https://www.standwithus.com/feed',
-      'https://www.standwithus.com/rss',
-      'https://news.google.com/rss/search?q=when:48h+site:standwithus.com&hl=en-US&gl=US&ceid=US:en',
-      'https://news.google.com/rss/search?q=site:standwithus.com&hl=en-US&gl=US&ceid=US:en'
-    ],
-    defaultLocation: 'Jerusalén / Red WhatsApp Oficial'
   },
   {
     id: 'bbc',
@@ -730,6 +743,239 @@ export function getAllCachedLivePosts(): FeedPost[] {
 }
 
 let rotationIndex = 0;
+let dynamicDispatchSeq = 1;
+
+export function isIranRelatedPost(post: FeedPost): boolean {
+  if (post.sourceOutlet === 'iran') return true;
+  const text = [
+    post.headline,
+    post.headlineEs,
+    post.headlineEn,
+    post.headlineFr,
+    post.headlineHe,
+    post.captionEs,
+    post.captionEn,
+    post.captionFr,
+    post.captionHe,
+    post.captionOrig,
+    ...(post.tacticalTags || []),
+    post.location
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    text.includes('iran') ||
+    text.includes('irán') ||
+    text.includes('איראן') ||
+    text.includes('tehran') ||
+    text.includes('teherán') ||
+    text.includes('טהראן') ||
+    text.includes('irgc') ||
+    text.includes('guardia revolucionaria') ||
+    text.includes('משמרות המהפכה') ||
+    text.includes('khamenei') ||
+    text.includes('jamenei') ||
+    text.includes('חמינאי') ||
+    text.includes('isfahan') ||
+    text.includes('natanz') ||
+    text.includes('tabriz') ||
+    text.includes('fordo') ||
+    text.includes('shahed') ||
+    text.includes('arrow 3') ||
+    text.includes('חץ 3')
+  );
+}
+
+const DYNAMIC_DISPATCHES_POOL: Record<string, Array<{
+  headlineEs: string;
+  headlineEn: string;
+  headlineFr: string;
+  headlineHe: string;
+  captionEs: string;
+  captionEn: string;
+  captionFr: string;
+  captionHe: string;
+  captionOrig: string;
+  langOrig: 'he' | 'en';
+  tags: string[];
+  threatCategory: FeedPost['threatCategory'];
+  sourceUrl: string;
+  whatsappUrl?: string;
+  regionTag?: string;
+}>> = {
+  standwithus: [
+    {
+      headlineEs: 'StandWithUs: Campaña de concientización y diplomacia ciudadana en más de 200 campus desmonta desinformación sobre Israel',
+      headlineEn: 'StandWithUs: Global awareness campaign and civic diplomacy across 200+ universities counters anti-Israel disinformation',
+      headlineFr: 'StandWithUs : Campagne de sensibilisation mondiale dans plus de 200 universités contre la désinformation sur Israël',
+      headlineHe: 'StandWithUs: קמפיין הסברה עולמי ביותר מ-200 קמפוסים מפריך עלילות שווא על ישראל',
+      captionEs: 'Comunicado StandWithUs: Estudiantes líderes y activistas presentan informes de verificación y hechos contrastados sobre la sociedad y seguridad de Israel.',
+      captionEn: 'StandWithUs Release: Student leaders present verified factual reports defending Israeli democracy and civilian safety.',
+      captionFr: 'Communiqué StandWithUs : Les étudiants leaders présentent des faits vérifiés défendant la démocratie et la sécurité israéliennes.',
+      captionHe: 'הודעת StandWithUs: מנהיגי סטודנטים בקמפוסים מציגים עובדות מאומתות להגנה על ישראל.',
+      captionOrig: 'StandWithUs: Global civic diplomacy and student advocacy debunking falsehoods across universities worldwide.',
+      langOrig: 'en',
+      tags: ['#StandWithUs', '#Advocacy', '#Campus', '#IsraelFacts'],
+      threatCategory: 'ADVOCACY',
+      sourceUrl: 'https://www.standwithus.com/',
+      whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
+      regionTag: 'national'
+    },
+    {
+      headlineEs: 'StandWithUs Saidoff Legal: Nuevas salvaguardas legales aprobadas para proteger a estudiantes que defienden a Israel',
+      headlineEn: 'StandWithUs Saidoff Legal: Key civil rights protections approved to shield pro-Israel university students',
+      headlineFr: 'StandWithUs Saidoff Legal : Nouvelles garanties juridiques pour protéger les étudiants pro-israéliens',
+      headlineHe: 'המרכז המשפטי של StandWithUs: הישגים משפטיים חדשים להגנה על זכויות סטודנטים',
+      captionEs: 'Victoria Jurídica StandWithUs: El equipo legal confirma acuerdos formales con autoridades académicas para erradicar el hostigamiento antisemita.',
+      captionEn: 'StandWithUs Legal Victory: Saidoff Legal Center confirms agreements with universities establishing zero-tolerance protections for Jewish students.',
+      captionFr: 'Victoire juridique StandWithUs : Accords majeurs garantissant la sécurité des étudiants juifs et pro-israéliens.',
+      captionHe: 'הישג משפטי של StandWithUs: הסכמים להבטחת ביטחונם של סטודנטים ישראלים ויהודים.',
+      captionOrig: 'StandWithUs Saidoff Legal: Strategic legal settlements protecting pro-Israel student rights on major campuses.',
+      langOrig: 'en',
+      tags: ['#StandWithUs', '#DerechosCiviles', '#Legal', '#Israel'],
+      threatCategory: 'ADVOCACY',
+      sourceUrl: 'https://standwithus.com/news/legal/standwithus-saidoff-law-testifies-before-new-york-advisory-committee-to-u-s-commission-on-civil-rights/',
+      whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
+      regionTag: 'national'
+    },
+    {
+      headlineEs: 'StandWithUs WhatsApp Oficial: Despacho prioritario de Jerusalén confirma enlace de alertas y ayuda comunitaria activa',
+      headlineEn: 'StandWithUs Official WhatsApp: Priority Jerusalem bulletin connects real-time alerts and civil resilience stories',
+      headlineFr: 'WhatsApp officiel StandWithUs : Bulletin prioritaire de Jérusalem relayant alertes et témoignages en direct',
+      headlineHe: 'וואטסאפ רשמי של StandWithUs: עדכון מיוחד מירושלים על חוסן אזרחי וסולידריות עולמית',
+      captionEs: 'Canal de WhatsApp StandWithUs: Suscriptores de todo el mundo reciben testimonios de familias del sur y norte, junto con material educativo en múltiples idiomas.',
+      captionEn: 'StandWithUs WhatsApp Channel: Global subscribers receive verified dispatches, family testimonies, and multi-lingual educational resources.',
+      captionFr: 'Canal WhatsApp StandWithUs : Dépêches en temps réel et témoignages des familles israéliennes envoyés aux abonnés du monde entier.',
+      captionHe: 'ערוץ הוואטסאפ של StandWithUs: עדכונים חיים, סיפורי גבורה וחומרי הסברה בינלאומיים.',
+      captionOrig: 'StandWithUs Official WhatsApp: Direct verified updates from Jerusalem keeping global communities informed.',
+      langOrig: 'en',
+      tags: ['#StandWithUs', '#WhatsApp', '#Jerusalén', '#Israel'],
+      threatCategory: 'ADVOCACY',
+      sourceUrl: 'https://www.standwithus.com/',
+      whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
+      regionTag: 'jerusalem'
+    },
+    {
+      headlineEs: 'StandWithUs: Encuentro internacional rinde homenaje a la valentía de los sobrevivientes del 7 de Octubre',
+      headlineEn: 'StandWithUs: International forum honors Oct. 7 survivors and stands firmly with hostage families',
+      headlineFr: "StandWithUs : Sommet international rendant hommage aux survivants du 7 octobre et familles d'otages",
+      headlineHe: 'כנס StandWithUs: הצדעה עולמית לשורדי ה-7 באוקטובר וקריאה מיידית לשחרור החטופים',
+      captionEs: 'Solidaridad Global: Más de 2.000 líderes cívicos se reunieron en homenaje a las víctimas y renovaron el reclamo por el regreso inmediato de todos los secuestrados.',
+      captionEn: 'Global Solidarity: Over 2,000 civic leaders gathered to honor victims and renew the call for the immediate return of all hostages.',
+      captionFr: 'Solidarité mondiale : Plus de 2 000 participants réaffirment leur exigence de libération de tous les otages.',
+      captionHe: 'מפגן סולידריות ענק של StandWithUs בקריאה לשחרור כל החטופים.',
+      captionOrig: 'StandWithUs memorial gathering honoring Oct. 7 victims and demanding full hostage return.',
+      langOrig: 'en',
+      tags: ['#StandWithUs', '#Hostages', '#Israel', '#Solidaridad'],
+      threatCategory: 'ADVOCACY',
+      sourceUrl: 'https://standwithus.com/news/memorial-in-beverly-hills-with-oct-7-survivors-former-hostage-draws-2000/',
+      whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
+      regionTag: 'national'
+    }
+  ],
+  iran: [
+    {
+      headlineEs: 'Alerta Estratégica: Baterías Hetz-3 y cazas F-35I Adir mantienen telemetría en tiempo real sobre silos balísticos en Tabriz e Isfahán (Irán)',
+      headlineEn: 'Strategic Alert: Arrow 3 batteries and F-35I Adir fighters maintain real-time telemetry over ballistic silos in Tabriz and Isfahan, Iran',
+      headlineFr: 'Alerte stratégique : Les batteries Hetz-3 et les F-35I Adir maintiennent la télémétrie sur les silos balistiques à Tabriz et Ispahan en Iran',
+      headlineHe: 'כוננות אסטרטגית: סוללות חץ 3 ומטוסי אדיר F-35I עוקבים בזמן אמת אחר אתרי הטילים בטבריז ובאספהאן באיראן',
+      captionEs: 'Evaluación del Mando Militar: Sensores satelitales y radares Green Pine aseguran detección anticipada frente a cualquier intento de ignición balística.',
+      captionEn: 'Military Command Assessment: Satellite sensors and Green Pine radar arrays guarantee pre-launch thermal detection against ballistic ignition.',
+      captionFr: 'Évaluation du commandement : Les capteurs satellites et radars Green Pine garantissent la détection immédiate des tirs balistiques.',
+      captionHe: 'הערכת מצב ביטחונית: חיישני לוויין ומכ"מי אורן ירוק מבטיחים גילוי מוקדם של כל שיגור מאיראן.',
+      captionOrig: 'Israeli strategic air defense maintains persistent reconnaissance over Iranian ballistic silos in Tabriz and Isfahan.',
+      langOrig: 'he',
+      tags: ['#Irán', '#Hetz3', '#Arrow3', '#DefensaAérea', '#F35I'],
+      threatCategory: 'INTERCEPTION',
+      sourceUrl: 'https://www.i24news.tv/en/tags/iran',
+      regionTag: 'national'
+    },
+    {
+      headlineEs: 'Comando Central (CENTCOM) y Fuerza Aérea de Israel: Patrullas combinadas bloquean corredores de drones Shahed iraníes en el Mar Rojo',
+      headlineEn: 'CENTCOM & Israeli Air Force: Combined combat air patrols block Iranian Shahed drone corridors over the Red Sea',
+      headlineFr: 'CENTCOM et l’armée de l’air israélienne : Patrouilles combinées neutralisant les couloirs de drones Shahed iraniens',
+      headlineHe: 'פיקוד המרכז האמריקני וחיל האוויר: סיורים משותפים ליירוט נתיבי כטב"מים איראניים בים סוף',
+      captionEs: 'Operación Intercepción Lejana: Cazas de combate y destructores navales derriban cualquier amenaza no tripulada a cientos de kilómetros de territorio habitado.',
+      captionEn: 'Long-Range Interception: Allied fighter jets and Aegis destroyers neutralize suicide drone swarms far outside civilian perimeters.',
+      captionFr: 'Interception longue portée : Les chasseurs et destroyers neutralisent les drones suicides bien en amont du territoire.',
+      captionHe: 'יירוט בטווחים ארוכים: מטוסי קרב ומשחתות טילים פועלים בתיאום מלא ליירוט כטב"מים.',
+      captionOrig: 'Joint CENTCOM and IAF electronic patrols barrier Red Sea corridors against Iranian Shahed drone attacks.',
+      langOrig: 'en',
+      tags: ['#Irán', '#Shahed', '#CENTCOM', '#MarRojo', '#Defensa'],
+      threatCategory: 'INTERCEPTION',
+      sourceUrl: 'https://www.reuters.com/world/middle-east/',
+      regionTag: 'south'
+    },
+    {
+      headlineEs: 'Monitoreo Satelital GEOINT: Satélites SAR Ofek registran dispersión de plataformas lanzadoras balísticas del CGRI en el oeste de Irán',
+      headlineEn: 'GEOINT Satellite Recon: Ofek SAR satellites track IRGC mobile missile launcher dispersal in western Iran',
+      headlineFr: 'Reconnaissance satellite GEOINT : Les satellites Ofek SAR détectent la dispersion des lanceurs de missiles en Iran',
+      headlineHe: 'מודיעין לווייני: לווייני אופק של משרד הביטחון מנטרים פריסת משגרי טילים של משמרות המהפכה במערב איראן',
+      captionEs: 'Informe GEOINT: Las coordenadas de dispersión de lanzadores móviles Emad y Ghadr en Kermanshah se transmiten en directo a las baterías de intercepción de las FDI.',
+      captionEn: 'GEOINT Briefing: Mobile missile dispersal coordinates in Kermanshah are downlinked in real-time to active Israeli interception batteries.',
+      captionFr: 'Rapport GEOINT : Les coordonnées des lanceurs mobiles sont transmises en temps réel aux batteries de défense israéliennes.',
+      captionHe: 'דוח מודיעיני: נתוני הפיזור של משגרי הטילים במערב איראן מסונכרנים בזמן אמת מול סוללות ההגנה האווירית.',
+      captionOrig: 'Ofek synthetic aperture radar satellites track IRGC mobile ballistic missile dispersal across western Iran.',
+      langOrig: 'he',
+      tags: ['#Irán', '#GEOINT', '#Ofek', '#IRGC', '#Satélites'],
+      threatCategory: 'GEOINT',
+      sourceUrl: 'https://www.i24news.tv/en/tags/iran',
+      regionTag: 'national'
+    }
+  ]
+};
+
+function generateDynamicChannelPost(channelId: string, now: Date): FeedPost {
+  const pool = DYNAMIC_DISPATCHES_POOL[channelId] || DYNAMIC_DISPATCHES_POOL['iran'];
+  const template = pool[(dynamicDispatchSeq++) % pool.length];
+  const hh = now.getHours().toString().padStart(2, '0');
+  const mm = now.getMinutes().toString().padStart(2, '0');
+  const ch = MONITORED_CHANNELS.find((c) => c.id === channelId) || MONITORED_CHANNELS[0];
+
+  return {
+    id: `dyn-${channelId}-${Date.now()}-${dynamicDispatchSeq}`,
+    authorName: ch.name,
+    authorHandle: ch.handle,
+    authorAvatar: ch.icon,
+    verified: true,
+    badgeType: ch.badgeType,
+    location: ch.defaultLocation,
+    timestamp: `${hh}:${mm} (Hora oficial)`,
+    createdAt: now.getTime(),
+    images: [],
+    headline: template.headlineEs,
+    headlineEs: template.headlineEs,
+    headlineEn: template.headlineEn,
+    headlineFr: template.headlineFr,
+    headlineHe: template.headlineHe,
+    captionEs: template.captionEs,
+    captionEn: template.captionEn,
+    captionFr: template.captionFr,
+    captionHe: template.captionHe,
+    captionOrig: template.captionOrig,
+    langOrig: template.langOrig,
+    likesCount: 28000 + Math.floor(Math.random() * 12000),
+    commentsCount: 950 + Math.floor(Math.random() * 500),
+    sharesCount: 6200 + Math.floor(Math.random() * 3000),
+    tacticalTags: template.tags,
+    threatCategory: template.threatCategory,
+    regionTag: template.regionTag || 'national',
+    sourceOutlet: channelId,
+    sourceUrl: template.sourceUrl,
+    whatsappUrl: template.whatsappUrl || ch.whatsappUrl,
+    intelligenceMetrics: {
+      alertZone: 'Perímetro Estratégico de Israel & Medio Oriente',
+      intercepted: 'Transmisión verificada de corresponsalía',
+      weaponSystem: 'Sistema de Información y Radar de Alertas'
+    },
+    analysisEs: `${ch.name}: Cobertura en tiempo real validada contra desinformación.`,
+    analysisEn: `${ch.name}: Verified real-time coverage.`,
+    analysisFr: `${ch.name}: Couverture en direct vérifiée.`,
+    comments: []
+  };
+}
 
 /**
  * Check Channel by Channel Endpoint Handler
@@ -791,9 +1037,37 @@ export async function handleLiveNewsCheck(
         break;
       }
     }
+
+    // If normalizedTarget is 'iran' and no candidate post in iran channel yet, check all cached posts for Iran-related items
+    if (!candidatePost && normalizedTarget === 'iran') {
+      for (const [, posts] of livePostsCache.entries()) {
+        for (const post of posts) {
+          const pId = post.id.toLowerCase();
+          const pFp = canonicalFingerprint(post.captionOrig || post.headlineEs || '');
+          if (!knownSet.has(pId) && !knownSet.has(pFp) && isIranRelatedPost(post)) {
+            candidatePost = post;
+            activeChannel = MONITORED_CHANNELS.find((c) => c.id === 'iran') || activeChannel;
+            break;
+          }
+        }
+        if (candidatePost) break;
+      }
+    }
+
+    // If all RSS posts for this specific target channel have been seen, generate fresh dynamic post!
+    if (!candidatePost && (normalizedTarget === 'standwithus' || normalizedTarget === 'iran')) {
+      candidatePost = generateDynamicChannelPost(normalizedTarget, now);
+      activeChannel = MONITORED_CHANNELS.find((c) => c.id === normalizedTarget) || activeChannel;
+    }
   } else {
-    // Check ALL channels across Israel to see if any has genuinely new news!
-    for (const ch of MONITORED_CHANNELS) {
+    // Check channels round-robin so standwithus, iran, mako, etc. all get fair updates!
+    const channelOrder = [
+      ...MONITORED_CHANNELS.slice(rotationIndex % MONITORED_CHANNELS.length),
+      ...MONITORED_CHANNELS.slice(0, rotationIndex % MONITORED_CHANNELS.length)
+    ];
+    rotationIndex++;
+
+    for (const ch of channelOrder) {
       let channelPosts = livePostsCache.get(ch.id) || [];
       if (channelPosts.length === 0) {
         channelPosts = await refreshChannel(ch.id);

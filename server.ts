@@ -1127,7 +1127,7 @@ app.get('/api/feed', (_req: Request, res: Response) => {
   const cachedPosts = getAllCachedLivePosts();
   res.json({
     success: true,
-    channelNotice: 'Conectado a canales oficiales y corresponsales verificados de Israel: StandWithUs (WhatsApp & Web), Mako/N12, חדשות 13, i24NEWS, BBC, CNN, Fox News, Reuters y Tzeva Adom',
+    channelNotice: 'Conectado a canales oficiales y corresponsales verificados de Israel: StandWithUs (WhatsApp & Web), Irán & Defensa, Mako/N12, חדשות 13, i24NEWS, BBC, CNN, Fox News, Reuters y Tzeva Adom',
     stories: [
       {
         id: 'story-standwithus',
@@ -1143,6 +1143,20 @@ app.get('/api/feed', (_req: Request, res: Response) => {
         whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
         sourceUrl: 'https://www.standwithus.com/',
         time: 'En vivo (WhatsApp)'
+      },
+      {
+        id: 'story-iran',
+        author: 'Defensa & Radar Irán',
+        handle: '@iran_intel_radar',
+        avatar: '🇮🇷',
+        title: 'Irán & Alertas',
+        hasUnseen: true,
+        priority: 'alert',
+        location: 'Búnker Kirya / Palmachim',
+        mediaUrl: '/src/assets/images/air_defense_interception_1792615715996.jpg',
+        caption: 'Alerta Estratégica Irán: Baterías Hetz-3 y cazas F-35I Adir monitorean 24/7 los vectores balísticos y silos de misiles en territorio iraní.',
+        sourceUrl: 'https://www.i24news.tv/en/tags/iran',
+        time: 'En vivo (Radar)'
       },
       {
         id: 'story-n12',

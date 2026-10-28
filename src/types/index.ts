@@ -54,7 +54,7 @@ export interface FeedPost {
   tacticalTags: string[];
   threatCategory: 'STRIKE' | 'INTERCEPTION' | 'NAVAL' | 'GEOINT' | 'DIPLOMACY' | 'POLITICS' | 'SOCIETY' | 'TECH' | 'ECONOMY' | 'CULTURE' | 'SPORTS' | 'ADVOCACY' | 'REGIONS' | 'DEFENSE' | string;
   regionTag?: 'north' | 'center' | 'jerusalem' | 'south' | 'national' | string;
-  sourceOutlet?: 'mako' | 'i24news' | 'ch13' | 'standwithus' | 'bbc' | 'cnn' | 'foxnews' | 'reuters' | 'telegram' | string;
+  sourceOutlet?: 'mako' | 'i24news' | 'ch13' | 'standwithus' | 'iran' | 'bbc' | 'cnn' | 'foxnews' | 'reuters' | 'telegram' | string;
   sourceUrl?: string;
   whatsappUrl?: string;
   headline?: string;

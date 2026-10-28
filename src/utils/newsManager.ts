@@ -170,7 +170,10 @@ export function recordDeliveredNewsKey(keyOrId: string): void {
  * - If NEW information is verified for a channel, returns it to be displayed.
  * - If NOT NEW, returns hasNew: false and DOES NOTHING (no duplicates, no recycled old news).
  */
-export async function fetchLatestNews(existingPosts: FeedPost[] = []): Promise<NewsUpdateResult> {
+export async function fetchLatestNews(
+  existingPosts: FeedPost[] = [],
+  targetOutlet: string = 'all'
+): Promise<NewsUpdateResult> {
   const now = new Date();
   const timeFormatted = now.toLocaleTimeString('es-ES', {
     hour: '2-digit',
@@ -195,6 +198,7 @@ export async function fetchLatestNews(existingPosts: FeedPost[] = []): Promise<N
   });
 
   const fallbackChannelsReport: ChannelCheckReport[] = [
+    { channelId: 'iran', channelName: 'Irán & Alertas Estratégicas', icon: '🇮🇷', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'standwithus', channelName: 'StandWithUs (WhatsApp & Web)', icon: '🇮🇱', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'mako', channelName: 'Mako Noticias (N12 Israel)', icon: '🔴', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'ch13', channelName: 'Noticias Canal 13 (חדשות 13)', icon: '📺', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
@@ -217,7 +221,8 @@ export async function fetchLatestNews(existingPosts: FeedPost[] = []): Promise<N
       },
       body: JSON.stringify({
         knownIds: Array.from(knownIds),
-        knownKeys: Array.from(knownKeys)
+        knownKeys: Array.from(knownKeys),
+        targetOutlet
       }),
       signal: controller.signal
     });

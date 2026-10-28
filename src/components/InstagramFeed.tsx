@@ -48,6 +48,7 @@ interface InstagramFeedProps {
 
 const OUTLET_FILTERS = [
   { id: 'all', label: 'Todos', labelEn: 'All Sources', labelFr: 'Toutes les sources', labelHe: 'כל המקורות', icon: '🌐' },
+  { id: 'iran', label: 'Irán', labelEn: 'Iran', labelFr: 'Iran', labelHe: 'איראן', domain: 'iran', icon: '🇮🇷' },
   { id: 'standwithus', label: 'StandWithUs', domain: 'standwithus.com', icon: '🇮🇱' },
   { id: 'mako', label: 'Mako (N12)', domain: 'mako.co.il', icon: '🔴' },
   { id: 'ch13', label: 'חדשות 13', domain: '13tv.co.il', icon: '📺' },
@@ -59,6 +60,7 @@ const OUTLET_FILTERS = [
 ];
 
 const ISRAEL_SEARCH_SUGGESTIONS = [
+  { label: '🇮🇷 Irán / Alertas', query: 'Irán' },
   { label: '🇮🇱 StandWithUs', query: 'StandWithUs' },
   { label: '💬 WhatsApp Oficial', query: 'WhatsApp' },
   { label: '🗳️ Elecciones 2026', query: 'Elecciones' },
@@ -121,6 +123,60 @@ export function getCategoryBadgeLabel(category?: string, region?: string): strin
     case 'GEOINT': return '📡 Inteligencia';
     default: return '🇮🇱 Israel';
   }
+}
+
+export function isIranRelatedPost(post: FeedPost): boolean {
+  if (post.sourceOutlet === 'iran') return true;
+  const text = [
+    post.headline,
+    post.headlineEs,
+    post.headlineEn,
+    post.headlineFr,
+    post.headlineHe,
+    post.captionEs,
+    post.captionEn,
+    post.captionFr,
+    post.captionHe,
+    post.captionOrig,
+    ...(post.tacticalTags || []),
+    post.location,
+    post.intelligenceMetrics?.alertZone,
+    post.intelligenceMetrics?.weaponSystem
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    text.includes('iran') ||
+    text.includes('irán') ||
+    text.includes('איראן') ||
+    text.includes('tehran') ||
+    text.includes('teherán') ||
+    text.includes('טהראן') ||
+    text.includes('irgc') ||
+    text.includes('guardia revolucionaria') ||
+    text.includes('משמרות המהפכה') ||
+    text.includes('khamenei') ||
+    text.includes('jamenei') ||
+    text.includes('חמינאי') ||
+    text.includes('isfahan') ||
+    text.includes('אספהאן') ||
+    text.includes('natanz') ||
+    text.includes('נתנז') ||
+    text.includes('tabriz') ||
+    text.includes('טבריז') ||
+    text.includes('fordo') ||
+    text.includes('פורדו') ||
+    text.includes('shahed') ||
+    text.includes('fattah') ||
+    text.includes('emad') ||
+    text.includes('kheibar') ||
+    text.includes('sejjil') ||
+    text.includes('ghadr') ||
+    text.includes('arrow 3') ||
+    text.includes('חץ 3')
+  );
 }
 
 export const InstagramFeed: React.FC<InstagramFeedProps> = ({
@@ -224,7 +280,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
   // Function to run the 2-minute periodic channel check
   const checkTwoMinuteUpdates = useCallback(async () => {
     try {
-      const result = await fetchLatestNews(posts);
+      const result = await fetchLatestNews(posts, selectedOutlet);
       setLastUpdatedTimestamp(Date.now());
       if (result.channelsReport && result.channelsReport.length > 0) {
         setChannelsReport(result.channelsReport);
@@ -263,7 +319,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     } catch (err) {
       console.warn('[Feed] Error checking for channel updates:', err);
     }
-  }, [posts, onAddNewPosts]);
+  }, [posts, selectedOutlet, onAddNewPosts]);
 
   // 2-Minute Auto-Check Countdown Interval
   useEffect(() => {
@@ -286,7 +342,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     alertAudio.playLikeChime();
 
     try {
-      const result = await fetchLatestNews(posts);
+      const result = await fetchLatestNews(posts, selectedOutlet);
       setLastUpdatedTimestamp(Date.now());
       setCountdown(120); // reset 2-minute timer on manual refresh
       if (result.channelsReport && result.channelsReport.length > 0) {
@@ -341,7 +397,22 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
 
   // Filter posts based on selected news outlet, category/region, AND search query
   const rawFiltered = sortedAllPosts.filter((post) => {
-    const matchesOutlet = selectedOutlet === 'all' || post.sourceOutlet === selectedOutlet;
+    let matchesOutlet = false;
+    if (selectedOutlet === 'all') {
+      matchesOutlet = true;
+    } else if (selectedOutlet === 'iran') {
+      matchesOutlet = isIranRelatedPost(post);
+    } else if (selectedOutlet === 'standwithus') {
+      matchesOutlet =
+        post.sourceOutlet === 'standwithus' ||
+        (post.authorName && post.authorName.toLowerCase().includes('standwithus')) ||
+        (post.authorHandle && post.authorHandle.toLowerCase().includes('standwithus')) ||
+        (post.sourceUrl && post.sourceUrl.includes('standwithus')) ||
+        post.threatCategory === 'ADVOCACY';
+    } else {
+      matchesOutlet = post.sourceOutlet === selectedOutlet;
+    }
+
     if (!matchesOutlet) return false;
 
     if (selectedCategory !== 'all') {
