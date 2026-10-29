@@ -170,10 +170,7 @@ export function recordDeliveredNewsKey(keyOrId: string): void {
  * - If NEW information is verified for a channel, returns it to be displayed.
  * - If NOT NEW, returns hasNew: false and DOES NOTHING (no duplicates, no recycled old news).
  */
-export async function fetchLatestNews(
-  existingPosts: FeedPost[] = [],
-  targetOutlet: string = 'all'
-): Promise<NewsUpdateResult> {
+export async function fetchLatestNews(existingPosts: FeedPost[] = []): Promise<NewsUpdateResult> {
   const now = new Date();
   const timeFormatted = now.toLocaleTimeString('es-ES', {
     hour: '2-digit',
@@ -198,11 +195,9 @@ export async function fetchLatestNews(
   });
 
   const fallbackChannelsReport: ChannelCheckReport[] = [
-    { channelId: 'iran', channelName: 'Irán & Alertas Estratégicas', icon: '🇮🇷', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
-    { channelId: 'internacional', channelName: 'Internacionales & Diplomacia', icon: '🌍', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'standwithus', channelName: 'StandWithUs (WhatsApp & Web)', icon: '🇮🇱', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'mako', channelName: 'Mako Noticias (N12 Israel)', icon: '🔴', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
-    { channelId: 'ch13', channelName: 'Noticias Canal 13 (Reshet 13)', icon: '📺', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
+    { channelId: 'ch13', channelName: 'Noticias Canal 13 (חדשות 13)', icon: '📺', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'i24news', channelName: 'i24NEWS Israel & World', icon: '🌐', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'bbc', channelName: 'BBC News Israel', icon: '🇬🇧', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
     { channelId: 'cnn', channelName: 'CNN Israel & Middle East', icon: '🇺🇸', checkedAt: now.toISOString(), hasNew: false, statusMessage: 'Al día (sin despachos nuevos)' },
@@ -222,9 +217,7 @@ export async function fetchLatestNews(
       },
       body: JSON.stringify({
         knownIds: Array.from(knownIds),
-        knownKeys: Array.from(knownKeys),
-        targetOutlet,
-        clientTimeMs: Date.now()
+        knownKeys: Array.from(knownKeys)
       }),
       signal: controller.signal
     });
@@ -236,13 +229,6 @@ export async function fetchLatestNews(
 
       if (data && data.hasNew && Array.isArray(data.newPosts) && data.newPosts.length > 0) {
         const candidate = data.newPosts[0] as FeedPost;
-        const nowMs = Date.now();
-        const d = new Date(nowMs);
-        const hh = d.getHours().toString().padStart(2, '0');
-        const mm = d.getMinutes().toString().padStart(2, '0');
-        candidate.createdAt = nowMs;
-        candidate.timestamp = `${hh}:${mm} (Hora oficial)`;
-
         const candidateId = candidate.id.toLowerCase();
         const candidateKey = getNewsCanonicalKey(candidate);
 

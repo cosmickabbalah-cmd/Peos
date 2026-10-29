@@ -265,7 +265,7 @@ const MONITORED_CHANNELS: MonitoredChannel[] = [
   },
   {
     id: 'ch13',
-    name: 'Noticias Canal 13 (Reshet 13)',
+    name: 'Noticias Canal 13 (חדשות 13)',
     handle: 'reshet13_noticias',
     icon: '📺',
     badgeType: 'MILITARY',
@@ -789,7 +789,7 @@ function generateSequentialNews(channelId: 'mako' | 'ch13' | 'i24news' | 'cnn' |
       return {
         id: `srv-dyn-ch13-${seq}-${Date.now()}`,
         channelId: 'ch13',
-        authorName: 'Noticias Canal 13 (Reshet 13)',
+        authorName: 'Noticias Canal 13 (חדשות 13)',
         authorHandle: 'reshet13_noticias',
         authorAvatar: '📺',
         verified: true,
@@ -917,7 +917,7 @@ function generateSequentialNews(channelId: 'mako' | 'ch13' | 'i24news' | 'cnn' |
       return {
         id: `srv-dyn-alert-${seq}-${Date.now()}`,
         channelId: 'telegram',
-        authorName: 'Tzeva Adom (Alerta Roja)',
+        authorName: 'Tzeva Adom / פיקוד העורף',
         authorHandle: 'tzeva_adom_live',
         authorAvatar: '🚨',
         verified: true,
@@ -1075,12 +1075,12 @@ function evaluateChannelUpdates(knownIdsSet: Set<string>, knownKeysSet: Set<stri
 // API: Check Channel by Channel Endpoint (POST with full JSON payload)
 app.post('/api/feed/check-channels', async (req: Request, res: Response) => {
   try {
-    const { knownIds = [], knownKeys = [], targetOutlet = 'all', clientTimeMs } = req.body || {};
+    const { knownIds = [], knownKeys = [], targetOutlet = 'all' } = req.body || {};
     const allKnown = [
       ...(Array.isArray(knownIds) ? knownIds : []),
       ...(Array.isArray(knownKeys) ? knownKeys : [])
     ];
-    const result = await handleLiveNewsCheck(allKnown, targetOutlet, clientTimeMs);
+    const result = await handleLiveNewsCheck(allKnown, targetOutlet);
     res.json(result);
   } catch (err: any) {
     console.error('Error in /api/feed/check-channels:', err);
@@ -1127,7 +1127,7 @@ app.get('/api/feed', (_req: Request, res: Response) => {
   const cachedPosts = getAllCachedLivePosts();
   res.json({
     success: true,
-    channelNotice: 'Conectado a canales oficiales y corresponsales verificados de Israel: StandWithUs (WhatsApp & Web), Irán & Defensa, Mako/N12, חדשות 13, i24NEWS, BBC, CNN, Fox News, Reuters y Tzeva Adom',
+    channelNotice: 'Conectado a canales oficiales y corresponsales verificados de Israel: StandWithUs (WhatsApp & Web), Mako/N12, חדשות 13, i24NEWS, BBC, CNN, Fox News, Reuters y Tzeva Adom',
     stories: [
       {
         id: 'story-standwithus',
@@ -1143,20 +1143,6 @@ app.get('/api/feed', (_req: Request, res: Response) => {
         whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
         sourceUrl: 'https://www.standwithus.com/',
         time: 'En vivo (WhatsApp)'
-      },
-      {
-        id: 'story-iran',
-        author: 'Defensa & Radar Irán',
-        handle: '@iran_intel_radar',
-        avatar: '🇮🇷',
-        title: 'Irán & Alertas',
-        hasUnseen: true,
-        priority: 'alert',
-        location: 'Búnker Kirya / Palmachim',
-        mediaUrl: '/src/assets/images/air_defense_interception_1792615715996.jpg',
-        caption: 'Alerta Estratégica Irán: Baterías Hetz-3 y cazas F-35I Adir monitorean 24/7 los vectores balísticos y silos de misiles en territorio iraní.',
-        sourceUrl: 'https://www.i24news.tv/en/tags/iran',
-        time: 'En vivo (Radar)'
       },
       {
         id: 'story-n12',

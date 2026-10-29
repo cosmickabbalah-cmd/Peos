@@ -1,4 +1,5 @@
 import type { AppLanguage, FeedPost } from '../types';
+import { translateToSpanish, translateToEnglish, translateToFrench } from './translator';
 
 export interface UIStrings {
   appName: string;
@@ -279,8 +280,6 @@ export const UI_TRANSLATIONS: Record<AppLanguage, UIStrings> = {
   }
 };
 
-const hasHebrew = (text?: string): boolean => typeof text === 'string' && /[\u0590-\u05FF]/.test(text);
-
 /**
  * Returns localized headline, caption, and analysis for a given FeedPost
  */
@@ -306,39 +305,61 @@ export function getPostContent(
   }
 
   if (lang === 'en') {
-    const rawHeadline = post.headlineEn || (!hasHebrew(post.headline) ? post.headline : undefined) || post.headlineEs || '';
-    const rawCaption = post.captionEn || post.captionEs || '';
+    let headline = post.headlineEn || post.headline || post.headlineEs || '';
+    let caption = post.captionEn || post.captionOrig || post.captionEs || '';
+    if (/[\u0590-\u05FF]/.test(headline)) {
+      headline = translateToEnglish(headline);
+      headline = headline.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    }
+    if (/[\u0590-\u05FF]/.test(caption)) {
+      caption = translateToEnglish(caption);
+      caption = caption.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    }
     return {
-      headline: hasHebrew(rawHeadline) ? (post.headlineEs || 'Breaking Israel Security Update') : rawHeadline,
-      caption: hasHebrew(rawCaption) ? (post.captionEs || 'Verified official intelligence and defense report.') : rawCaption,
+      headline: headline || `${post.authorName}: Live update from Israel`,
+      caption: caption || `Live report from ${post.authorName}. Information confirmed.`,
       analysis: post.analysisEn || post.analysisEs || ''
     };
   }
 
   if (lang === 'fr') {
-    const rawHeadline = post.headlineFr || (!hasHebrew(post.headline) ? post.headline : undefined) || post.headlineEs || '';
-    const rawCaption = post.captionFr || post.captionEs || '';
+    let headline = post.headlineFr || post.headline || post.headlineEs || '';
+    let caption = post.captionFr || post.captionEs || '';
+    if (/[\u0590-\u05FF]/.test(headline)) {
+      headline = translateToFrench(headline);
+      headline = headline.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    }
+    if (/[\u0590-\u05FF]/.test(caption)) {
+      caption = translateToFrench(caption);
+      caption = caption.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    }
     return {
-      headline: hasHebrew(rawHeadline) ? (post.headlineEs || 'Dépêche urgente de sécurité en Israël') : rawHeadline,
-      caption: hasHebrew(rawCaption) ? (post.captionEs || 'Rapport officiel vérifié de sécurité.') : rawCaption,
+      headline: headline || `${post.authorName} : Dépêche en direct d'Israël`,
+      caption: caption || `Dépêche en direct de ${post.authorName}. Suivi opérationnel en continu.`,
       analysis: post.analysisFr || post.analysisEs || ''
     };
   }
 
-  // Default Spanish (100% Guaranteed Spanish text, zero Hebrew fallback)
-  let headline = post.headlineEs || (!hasHebrew(post.headline) ? post.headline : undefined) || '';
-  if (!headline || hasHebrew(headline)) {
-    headline = post.headlineEs || (!hasHebrew(post.headlineEn) ? post.headlineEn : '') || 'Actualización de seguridad y defensa de Israel';
+  // Default Spanish (strictly guaranteed zero Hebrew characters)
+  let headline = post.headlineEs || post.headline || '';
+  let caption = post.captionEs || '';
+
+  if (/[\u0590-\u05FF]/.test(headline)) {
+    headline = translateToSpanish(headline);
+    headline = headline.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
   }
 
-  let caption = post.captionEs || '';
-  if (!caption || hasHebrew(caption)) {
-    caption = post.captionEs || (!hasHebrew(post.captionEn) ? post.captionEn : '') || 'Reporte oficial de última hora verificado sobre el territorio nacional de Israel.';
+  if (/[\u0590-\u05FF]/.test(caption)) {
+    caption = translateToSpanish(caption);
+    caption = caption.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
   }
+
+  const cleanHeadline = headline || `${post.authorName}: Actualización informativa en directo desde Israel`;
+  const cleanCaption = caption || `Despacho en directo de ${post.authorName}: Cobertura en tiempo real sobre acontecimientos en Israel. Información confirmada.`;
 
   return {
-    headline,
-    caption,
+    headline: cleanHeadline,
+    caption: cleanCaption,
     analysis: post.analysisEs || ''
   };
 }

@@ -47,22 +47,18 @@ interface InstagramFeedProps {
 }
 
 const OUTLET_FILTERS = [
-  { id: 'all', label: 'Todos', labelEn: 'All Sources', labelFr: 'Toutes les sources', labelHe: 'כל המקורות', icon: '🌐' },
-  { id: 'iran', label: 'Irán', labelEn: 'Iran', labelFr: 'Iran', labelHe: 'איראן', domain: 'iran', icon: '🇮🇷' },
-  { id: 'internacional', label: 'Internacionales', labelEn: 'International', labelFr: 'International', labelHe: 'בינלאומי', domain: 'international', icon: '🌍' },
-  { id: 'standwithus', label: 'StandWithUs', domain: 'standwithus.com', icon: '🇮🇱' },
-  { id: 'mako', label: 'Mako (N12)', labelEn: 'Mako (N12)', labelFr: 'Mako (N12)', labelHe: 'מאקו (חדשות 12)', domain: 'mako.co.il', icon: '🔴' },
-  { id: 'ch13', label: 'Canal 13', labelEn: 'Channel 13', labelFr: 'Chaîne 13', labelHe: 'חדשות 13', domain: '13tv.co.il', icon: '📺' },
-  { id: 'i24news', label: 'i24NEWS', domain: 'i24news.tv', icon: '🌐' },
-  { id: 'bbc', label: 'BBC News', domain: 'bbc.com', icon: '🇬🇧' },
-  { id: 'cnn', label: 'CNN', domain: 'cnn.com', icon: '🇺🇸' },
-  { id: 'foxnews', label: 'Fox News', domain: 'foxnews.com', icon: '🦅' },
-  { id: 'reuters', label: 'Reuters', domain: 'reuters.com', icon: '⚡' }
+  { id: 'all', label: 'Todos los Medios', labelEn: 'All Sources', labelFr: 'Toutes les sources', labelHe: 'כל המקורות', icon: '🌐' },
+  { id: 'standwithus', label: 'StandWithUs', labelEn: 'StandWithUs', labelFr: 'StandWithUs', labelHe: 'StandWithUs', domain: 'standwithus.com', icon: '🇮🇱' },
+  { id: 'mako', label: 'Mako Noticias (N12)', labelEn: 'Mako News (N12)', labelFr: 'Mako Actualités (N12)', labelHe: 'חדשות 12 (מאקו)', domain: 'mako.co.il', icon: '🔴' },
+  { id: 'ch13', label: 'Canal 13 (Reshet 13)', labelEn: 'Channel 13 (Reshet 13)', labelFr: 'Chaîne 13 (Reshet 13)', labelHe: 'חדשות 13 (רשת 13)', domain: '13tv.co.il', icon: '📺' },
+  { id: 'i24news', label: 'i24NEWS', labelEn: 'i24NEWS', labelFr: 'i24NEWS', labelHe: 'i24NEWS', domain: 'i24news.tv', icon: '🌐' },
+  { id: 'bbc', label: 'BBC News', labelEn: 'BBC News', labelFr: 'BBC News', labelHe: 'BBC News', domain: 'bbc.com', icon: '🇬🇧' },
+  { id: 'cnn', label: 'CNN', labelEn: 'CNN', labelFr: 'CNN', labelHe: 'CNN', domain: 'cnn.com', icon: '🇺🇸' },
+  { id: 'foxnews', label: 'Fox News', labelEn: 'Fox News', labelFr: 'Fox News', labelHe: 'Fox News', domain: 'foxnews.com', icon: '🦅' },
+  { id: 'reuters', label: 'Reuters', labelEn: 'Reuters', labelFr: 'Reuters', labelHe: 'רויטרס', domain: 'reuters.com', icon: '⚡' }
 ];
 
 const ISRAEL_SEARCH_SUGGESTIONS = [
-  { label: '🇮🇷 Irán / Alertas', query: 'Irán' },
-  { label: '🌍 Internacionales / Diplomacia', query: 'Internacional' },
   { label: '🇮🇱 StandWithUs', query: 'StandWithUs' },
   { label: '💬 WhatsApp Oficial', query: 'WhatsApp' },
   { label: '🗳️ Elecciones 2026', query: 'Elecciones' },
@@ -125,121 +121,6 @@ export function getCategoryBadgeLabel(category?: string, region?: string): strin
     case 'GEOINT': return '📡 Inteligencia';
     default: return '🇮🇱 Israel';
   }
-}
-
-export function isIranRelatedPost(post: FeedPost): boolean {
-  if (post.sourceOutlet === 'iran') return true;
-  const text = [
-    post.headline,
-    post.headlineEs,
-    post.headlineEn,
-    post.headlineFr,
-    post.headlineHe,
-    post.captionEs,
-    post.captionEn,
-    post.captionFr,
-    post.captionHe,
-    post.captionOrig,
-    ...(post.tacticalTags || []),
-    post.location,
-    post.intelligenceMetrics?.alertZone,
-    post.intelligenceMetrics?.weaponSystem
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  return (
-    text.includes('iran') ||
-    text.includes('irán') ||
-    text.includes('איראן') ||
-    text.includes('tehran') ||
-    text.includes('teherán') ||
-    text.includes('טהראן') ||
-    text.includes('irgc') ||
-    text.includes('guardia revolucionaria') ||
-    text.includes('משמרות המהפכה') ||
-    text.includes('khamenei') ||
-    text.includes('jamenei') ||
-    text.includes('חמינאי') ||
-    text.includes('isfahan') ||
-    text.includes('אספהאן') ||
-    text.includes('natanz') ||
-    text.includes('נתנז') ||
-    text.includes('tabriz') ||
-    text.includes('טבריז') ||
-    text.includes('fordo') ||
-    text.includes('פורדו') ||
-    text.includes('shahed') ||
-    text.includes('fattah') ||
-    text.includes('emad') ||
-    text.includes('kheibar') ||
-    text.includes('sejjil') ||
-    text.includes('ghadr') ||
-    text.includes('arrow 3') ||
-    text.includes('חץ 3')
-  );
-}
-
-export function isInternationalRelatedPost(post: FeedPost): boolean {
-  if (post.sourceOutlet === 'internacional' || post.sourceOutlet === 'international') return true;
-  if (post.threatCategory === 'DIPLOMACY' || post.threatCategory === 'GLOBAL' || post.regionTag === 'international') return true;
-
-  const text = [
-    post.headline,
-    post.headlineEs,
-    post.headlineEn,
-    post.headlineFr,
-    post.headlineHe,
-    post.captionEs,
-    post.captionEn,
-    post.captionFr,
-    post.captionHe,
-    post.captionOrig,
-    ...(post.tacticalTags || []),
-    post.location,
-    post.authorName
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  return (
-    text.includes('internacional') ||
-    text.includes('international') ||
-    text.includes('בינלאומי') ||
-    text.includes('diplomacia') ||
-    text.includes('diplomacy') ||
-    text.includes('דיפלומטיה') ||
-    text.includes('onu') ||
-    text.includes('naciones unidas') ||
-    text.includes('united nations') ||
-    text.includes('consejo de seguridad') ||
-    text.includes('un security council') ||
-    text.includes('ee.uu') ||
-    text.includes('estados unidos') ||
-    text.includes('united states') ||
-    text.includes('washington') ||
-    text.includes('pentagon') ||
-    text.includes('pentágono') ||
-    text.includes('centcom') ||
-    text.includes('white house') ||
-    text.includes('casa blanca') ||
-    text.includes('unión europea') ||
-    text.includes('european union') ||
-    text.includes('bruselas') ||
-    text.includes('g7') ||
-    text.includes('otan') ||
-    text.includes('nato') ||
-    text.includes('emiratos') ||
-    text.includes('abraham') ||
-    text.includes('la haya') ||
-    text.includes('icj') ||
-    text.includes('biden') ||
-    text.includes('trump') ||
-    text.includes('macron') ||
-    text.includes('starmer')
-  );
 }
 
 export const InstagramFeed: React.FC<InstagramFeedProps> = ({
@@ -327,68 +208,23 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     return `${dateStr} - ${timeStr}`;
   };
 
-  const formatOfficialTimestamp = (postOrTimestamp: string | FeedPost, lang: AppLanguage) => {
-    let raw = '';
-    let createdAt: number | undefined;
-
-    if (typeof postOrTimestamp === 'object' && postOrTimestamp !== null) {
-      raw = postOrTimestamp.timestamp || '';
-      createdAt = postOrTimestamp.createdAt;
-    } else {
-      raw = postOrTimestamp || '';
-    }
-
-    let timeStr = '';
-
-    // 1. ABSOLUTE PRIORITY: Format post.createdAt directly into the user's local browser clock time
-    if (createdAt && typeof createdAt === 'number' && createdAt > 0) {
-      const d = new Date(createdAt);
-      timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    }
-
-    // 2. If no valid createdAt, extract clock hour in format HH:MM from raw string
-    if (!timeStr && raw) {
-      const clockMatch = raw.match(/(\d{1,2}:\d{2})/);
-      if (clockMatch) {
-        timeStr = clockMatch[1];
-      }
-    }
-
-    // 3. If relative string like "Hace 3m", "Hace 11m", "11m ago", calculate from current time
-    if (!timeStr && raw) {
-      const minMatch = raw.match(/(\d+)\s*m/i);
-      const hourMatch = raw.match(/(\d+)\s*h/i);
-      let minsAgo = 0;
-      if (hourMatch) minsAgo += parseInt(hourMatch[1], 10) * 60;
-      if (minMatch) minsAgo += parseInt(minMatch[1], 10);
-      if (minsAgo > 0) {
-        const d = new Date(Date.now() - minsAgo * 60000);
-        timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      }
-    }
-
-    // 4. Default fallback to current time
-    if (!timeStr) {
-      const d = new Date();
-      timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    }
-
+  const formatOfficialTimestamp = (timestamp: string, lang: AppLanguage) => {
     if (lang === 'he') {
-      return `פורסם: ${timeStr} (שעה רשמית)`;
+      return timestamp.replace('(Hora oficial)', '(שעה רשמית)');
     }
     if (lang === 'en') {
-      return `Published: ${timeStr} (Official time)`;
+      return timestamp.replace('(Hora oficial)', '(Official time)');
     }
     if (lang === 'fr') {
-      return `Publié à : ${timeStr} (Heure officielle)`;
+      return timestamp.replace('(Hora oficial)', '(Heure officielle)');
     }
-    return `Publicado: ${timeStr} (Hora oficial)`;
+    return timestamp;
   };
 
   // Function to run the 2-minute periodic channel check
   const checkTwoMinuteUpdates = useCallback(async () => {
     try {
-      const result = await fetchLatestNews(posts, selectedOutlet);
+      const result = await fetchLatestNews(posts);
       setLastUpdatedTimestamp(Date.now());
       if (result.channelsReport && result.channelsReport.length > 0) {
         setChannelsReport(result.channelsReport);
@@ -427,7 +263,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     } catch (err) {
       console.warn('[Feed] Error checking for channel updates:', err);
     }
-  }, [posts, selectedOutlet, onAddNewPosts]);
+  }, [posts, onAddNewPosts]);
 
   // 2-Minute Auto-Check Countdown Interval
   useEffect(() => {
@@ -450,7 +286,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     alertAudio.playLikeChime();
 
     try {
-      const result = await fetchLatestNews(posts, selectedOutlet);
+      const result = await fetchLatestNews(posts);
       setLastUpdatedTimestamp(Date.now());
       setCountdown(120); // reset 2-minute timer on manual refresh
       if (result.channelsReport && result.channelsReport.length > 0) {
@@ -505,24 +341,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
 
   // Filter posts based on selected news outlet, category/region, AND search query
   const rawFiltered = sortedAllPosts.filter((post) => {
-    let matchesOutlet = false;
-    if (selectedOutlet === 'all') {
-      matchesOutlet = true;
-    } else if (selectedOutlet === 'iran') {
-      matchesOutlet = isIranRelatedPost(post);
-    } else if (selectedOutlet === 'internacional' || selectedOutlet === 'international') {
-      matchesOutlet = isInternationalRelatedPost(post);
-    } else if (selectedOutlet === 'standwithus') {
-      matchesOutlet =
-        post.sourceOutlet === 'standwithus' ||
-        (post.authorName && post.authorName.toLowerCase().includes('standwithus')) ||
-        (post.authorHandle && post.authorHandle.toLowerCase().includes('standwithus')) ||
-        (post.sourceUrl && post.sourceUrl.includes('standwithus')) ||
-        post.threatCategory === 'ADVOCACY';
-    } else {
-      matchesOutlet = post.sourceOutlet === selectedOutlet;
-    }
-
+    const matchesOutlet = selectedOutlet === 'all' || post.sourceOutlet === selectedOutlet;
     if (!matchesOutlet) return false;
 
     if (selectedCategory !== 'all') {
@@ -542,38 +361,10 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
 
   const displayedPosts = filteredPosts.slice(0, visibleCount);
 
-  const handleSelectOutlet = async (outletId: string) => {
+  const handleSelectOutlet = (outletId: string) => {
     alertAudio.playLikeChime();
     setSelectedOutlet(outletId);
-    setSelectedCategory('all');
     setVisibleCount(15);
-
-    // Instant channel update when user clicks a specific channel tab
-    if (outletId !== 'all') {
-      try {
-        const result = await fetchLatestNews(posts, outletId);
-        if (result.hasNew && result.newPosts.length > 0 && onAddNewPosts) {
-          const currentKeys = new Set([
-            ...posts.map((p) => p.id.toLowerCase()),
-            ...posts.map((p) => getNewsCanonicalKey(p))
-          ]);
-          const uniqueNew = result.newPosts.filter(
-            (p) => !currentKeys.has(p.id.toLowerCase()) && !currentKeys.has(getNewsCanonicalKey(p))
-          );
-          if (uniqueNew.length > 0) {
-            onAddNewPosts(uniqueNew);
-            const newIds = new Set(uniqueNew.map((p) => p.id));
-            setHighlightedPostIds(newIds);
-            setTimeout(() => setHighlightedPostIds(new Set()), 10000);
-            const channelName = uniqueNew[0].authorName || 'Canal';
-            setToastMessage(`✓ ${channelName}: Nueva noticia en este canal`);
-            setTimeout(() => setToastMessage(null), 4000);
-          }
-        }
-      } catch {
-        // quiet ignore
-      }
-    }
   };
 
   const handleLoadMore = () => {
@@ -1116,7 +907,14 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5 text-xs truncate">
                     <span className="font-bold text-white text-sm sm:text-base hover:underline cursor-pointer">
-                      {post.authorName}
+                      {appLanguage === 'he'
+                        ? ((post as any).authorNameHe || post.authorName)
+                        : (post.authorName || '')
+                            .replace(/חדשות 13/g, 'Noticias Canal 13 (Reshet 13)')
+                            .replace(/חדשות 12|ערוץ 12|מאקו/g, 'Mako Noticias (N12)')
+                            .replace(/ערוץ 13/g, 'Canal 13 Israel')
+                            .replace(/[\u0590-\u05FF]+/g, '')
+                            .trim() || post.authorName}
                     </span>
 
                     {/* Verified Badges */}
@@ -1138,7 +936,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                       className="text-neutral-300 font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800"
                       title={appLanguage === 'he' ? "שעה מדויקת של פרסום באתר הרשמי" : "Hora exacta de publicación en el medio oficial"}
                     >
-                      {formatOfficialTimestamp(post, appLanguage)}
+                      {formatOfficialTimestamp(post.timestamp, appLanguage)}
                     </span>
 
                     {/* Visible indicator that this is the most recent dispatch */}
@@ -1169,7 +967,9 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                   </span>
                   {post.location && (
                     <span className="text-[10px] text-neutral-400 font-medium bg-neutral-950/60 px-2 py-0.5 rounded border border-neutral-800">
-                      📍 {post.location}
+                      📍 {appLanguage !== 'he' && /[\u0590-\u05FF]/.test(post.location)
+                            ? post.location.replace(/[\u0590-\u05FF]+/g, '').trim() || 'Israel'
+                            : post.location}
                     </span>
                   )}
                   {post.whatsappUrl && (
@@ -1200,14 +1000,20 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
 
                 {/* Tactical Tags */}
                 <div className="flex flex-wrap gap-1.5 pt-0.5">
-                  {post.tacticalTags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs text-sky-400 hover:underline cursor-pointer font-medium"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  {post.tacticalTags.map((tag) => {
+                    const displayTag = appLanguage !== 'he' && /[\u0590-\u05FF]/.test(tag)
+                      ? '#' + tag.replace('#', '').replace(/[\u0590-\u05FF]+/g, '').trim()
+                      : tag;
+                    if (!displayTag || displayTag === '#') return null;
+                    return (
+                      <span
+                        key={tag}
+                        className="text-xs text-sky-400 hover:underline cursor-pointer font-medium"
+                      >
+                        {displayTag}
+                      </span>
+                    );
+                  })}
                 </div>
 
                 {/* Language Toggle Button & Tactical Context Button */}
@@ -1269,6 +1075,41 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                   </div>
                 )}
 
+                {/* StandWithUs WhatsApp Official Channel & Website Quick Access */}
+                {(post.whatsappUrl || post.sourceOutlet === 'standwithus' || post.authorName.includes('StandWithUs')) && (
+                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-600/50 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                        <span className="text-sm">💬</span>
+                        <span>Canal Oficial de WhatsApp & Web de StandWithUs</span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-200 border border-emerald-700/60">
+                        Canal Verificado
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <a
+                        href={post.whatsappUrl || "https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
+                      >
+                        <span>Unirse en WhatsApp</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                      <a
+                        href={post.sourceUrl || "https://www.standwithus.com/"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-semibold border border-neutral-700 transition-colors"
+                      >
+                        <Globe className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Sitio Web Oficial</span>
+                      </a>
+                    </div>
+                  </div>
+                )}
+
                 {/* X Source Link Card (Clickable URL to official source) */}
                 {post.sourceUrl && (
                   <a
@@ -1286,7 +1127,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                           </span>
                           <span className="text-neutral-600">·</span>
                           <span className="text-sky-400/90 font-mono text-[10px]">
-                            {formatOfficialTimestamp(post, appLanguage)}
+                            {formatOfficialTimestamp(post.timestamp, appLanguage)}
                           </span>
                         </div>
                         <p className="text-white font-medium text-xs truncate group-hover:text-sky-300 transition-colors">

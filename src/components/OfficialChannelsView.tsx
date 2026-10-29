@@ -13,15 +13,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🇮🇱'
     },
     {
-      title: 'Irán & Alertas Estratégicas (FDI & CENTCOM)',
-      description: 'Monitoreo 24/7 de vectores balísticos, silos subterráneos del CGRI, actividad nuclear y coordinación defensiva de las baterías Hetz-3 y THAAD.',
-      url: 'https://www.i24news.tv/en/tags/iran',
-      badge: 'i24news.tv/iran',
-      badgeColor: 'border-purple-800 bg-purple-950 text-purple-300',
-      icon: '🇮🇷'
-    },
-    {
-      title: 'Mako Noticias Israel (N12 News)',
+      title: 'Mako Noticias de Israel (Canal 12 / N12)',
       description: 'Portal principal de noticias de Israel y Canal 12. Cobertura en vivo con Nir Dvori y corresponsales en la Kirya.',
       url: 'https://www.mako.co.il/news-dailynews',
       badge: 'mako.co.il',
@@ -37,7 +29,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🌐'
     },
     {
-      title: 'Canal 13 Noticias (Reshet 13 Israel)',
+      title: 'Noticias Canal 13 (Reshet 13 Israel)',
       description: 'Cadena de televisión de Israel con análisis militar especializado de Alon Ben-David y Or Heller.',
       url: 'https://13tv.co.il/news/news-flash/',
       badge: '13tv.co.il',
@@ -77,7 +69,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '⚡'
     },
     {
-      title: 'Tzeva Adom (צבע אדום - Red Alert)',
+      title: 'Tzeva Adom (Alerta Roja / Red Alert)',
       description: 'Plataforma oficial comunitaria de monitoreo y alerta temprana en tiempo real para todos los distritos de Israel.',
       url: 'https://www.tzevaadom.co.il/en/',
       badge: 'tzevaadom.co.il',
@@ -85,7 +77,7 @@ export const OfficialChannelsView: React.FC = () => {
       icon: '🚨'
     },
     {
-      title: 'Canal Telegram: Alertas de Misiles (Tzeva Adom)',
+      title: 'Canal Telegram: Alertas de Lanzamiento en Vivo',
       description: 'Canal oficial verificado en Telegram con notificaciones push instantáneas en milisegundos tras cada activación de sirena.',
       url: 'https://t.me/s/tzevaadom',
       badge: 't.me/tzevaadom',
