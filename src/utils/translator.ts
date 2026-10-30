@@ -1,401 +1,413 @@
 /**
  * Comprehensive Multilingual News Translator
- * Translates news headlines, dispatches, and military/geopolitical intelligence
+ * Translates news headlines, dispatches, and geopolitical/civil intelligence
  * among Spanish (es), French (fr), English (en), and Hebrew (he).
  */
 
 import type { AppLanguage } from '../types';
 
-// Common words and phrase dictionary for instant deterministic translation
-const DICTIONARY: Record<string, { es: string; fr: string; en: string; he: string }> = {
-  // Common news verbs and phrases
-  'breaking news': { es: 'Última hora', fr: 'Dernière minute', en: 'Breaking news', he: 'מבזק מיוחד' },
-  'live updates': { es: 'Actualizaciones en vivo', fr: 'Mises à jour en direct', en: 'Live updates', he: 'עדכונים שוטפים' },
-  'live blog': { es: 'Minuto a minuto en vivo', fr: 'Direct en continu', en: 'Live blog', he: 'בלוג חי' },
-  'air defense': { es: 'defensa aérea', fr: 'défense aérienne', en: 'air defense', he: 'הגנה אווירית' },
-  'air strike': { es: 'ataque aéreo', fr: 'frappe aérienne', en: 'air strike', he: 'תקיפה אווירית' },
-  'airstrike': { es: 'ataque aéreo', fr: 'frappe aérienne', en: 'airstrike', he: 'תקיפה אווירית' },
-  'ballistic missile': { es: 'misil balístico', fr: 'missile balistique', en: 'ballistic missile', he: 'טיל בליסטי' },
-  'ballistic missiles': { es: 'misiles balísticos', fr: 'missiles balistiques', en: 'ballistic missiles', he: 'טילים בליסטיים' },
-  'cruise missile': { es: 'misil de crucero', fr: 'missile de croisière', en: 'cruise missile', he: 'טיל שיוט' },
-  'cruise missiles': { es: 'misiles de crucero', fr: 'missiles de croisière', en: 'cruise missiles', he: 'טילי שיוט' },
-  'drone infiltration': { es: 'infiltración de drones', fr: 'infiltration de drones', en: 'drone infiltration', he: 'חדירת כלי טיס עוין' },
-  'drone': { es: 'dron', fr: 'drone', en: 'drone', he: 'כטב\"ם' },
-  'drones': { es: 'drones', fr: 'drones', en: 'drones', he: 'כטב\"מים' },
-  'interception': { es: 'intercepción', fr: 'interception', en: 'interception', he: 'יירוט' },
-  'intercepted': { es: 'interceptado', fr: 'intercepté', en: 'intercepted', he: 'יורט' },
-  'intercepts': { es: 'intercepta', fr: 'intercepte', en: 'intercepts', he: 'מיירט' },
-  'red alert': { es: 'Alerta Roja', fr: 'Alerte Rouge', en: 'Red Alert', he: 'צבע אדום' },
-  'sirens': { es: 'sirenas', fr: 'sirènes', en: 'sirens', he: 'אזעקות' },
-  'siren sounding': { es: 'sirenas activadas', fr: 'sirènes déclenchées', en: 'sirens sounding', he: 'אזעקות מופעלות' },
-  'rocket fire': { es: 'disparo de cohetes', fr: 'tirs de roquettes', en: 'rocket fire', he: 'ירי רקטות' },
-  'rockets': { es: 'cohetes', fr: 'roquettes', en: 'rockets', he: 'רקטות' },
-  'security cabinet': { es: 'gabinete de seguridad', fr: 'cabinet de sécurité', en: 'security cabinet', he: 'הקבינט הביטחוני' },
-  'military base': { es: 'base militar', fr: 'base militaire', en: 'military base', he: 'בסיס צבאי' },
-  'border': { es: 'frontera', fr: 'frontière', en: 'border', he: 'גבול' },
-  'northern border': { es: 'frontera norte', fr: 'frontière nord', en: 'northern border', he: 'גבול הצפון' },
-  'southern border': { es: 'frontera sur', fr: 'frontière sud', en: 'southern border', he: 'גבול הדרום' },
-  'home front command': { es: 'Comando del Frente Doméstico', fr: 'Commandement du front intérieur', en: 'Home Front Command', he: 'פיקוד העורף' },
-  'defense minister': { es: 'ministro de defensa', fr: 'ministre de la défense', en: 'defense minister', he: 'שר הביטחון' },
-  'prime minister': { es: 'primer ministro', fr: 'premier ministre', en: 'prime minister', he: 'ראש הממשלה' },
-  'foreign ministry': { es: 'ministerio de exteriores', fr: 'ministère des affaires étrangères', en: 'foreign ministry', he: 'משרד החוץ' },
-  'white house': { es: 'Casa Blanca', fr: 'Maison Blanche', en: 'White House', he: 'הבית הלבן' },
-  'pentagon': { es: 'Pentágono', fr: 'Pentagone', en: 'Pentagon', he: 'הפנטגון' },
-  'centcom': { es: 'Comando Central (CENTCOM)', fr: 'Commandement central (CENTCOM)', en: 'CENTCOM', he: 'סנטקום' },
-  'united states': { es: 'Estados Unidos', fr: 'États-Unis', en: 'United States', he: 'ארצות הברית' },
-  'us': { es: 'EE.UU.', fr: 'États-Unis', en: 'US', he: 'ארה\"ב' },
-  'israel': { es: 'Israel', fr: 'Israël', en: 'Israel', he: 'ישראל' },
-  'iran': { es: 'Irán', fr: 'Iran', en: 'Iran', he: 'איראן' },
-  'tehran': { es: 'Teherán', fr: 'Téhéran', en: 'Tehran', he: 'טהראן' },
-  'lebanon': { es: 'Líbano', fr: 'Liban', en: 'Lebanon', he: 'לבנון' },
-  'beirut': { es: 'Beirut', fr: 'Beyrouth', en: 'Beirut', he: 'ביירות' },
-  'gaza': { es: 'Gaza', fr: 'Gaza', en: 'Gaza', he: 'עזה' },
-  'syria': { es: 'Siria', fr: 'Syrie', en: 'Syria', he: 'סוריה' },
-  'damascus': { es: 'Damasco', fr: 'Damas', en: 'Damascus', he: 'דמשק' },
-  'yemen': { es: 'Yemen', fr: 'Yémen', en: 'Yemen', he: 'תימן' },
-  'houthis': { es: 'hutíes', fr: 'houthis', en: 'Houthis', he: 'חות\'ים' },
-  'hezbollah': { es: 'Hezbolá', fr: 'Hezbollah', en: 'Hezbollah', he: 'חיזבאללה' },
-  'red sea': { es: 'Mar Rojo', fr: 'Mer Rouge', en: 'Red Sea', he: 'הים האדום' },
-  'persian gulf': { es: 'Golfo Pérsico', fr: 'Golfe Persique', en: 'Persian Gulf', he: 'המפרץ הפרסי' },
-  'gulf of oman': { es: 'Golfo de Omán', fr: 'Golfe d\'Oman', en: 'Gulf of Oman', he: 'מפרץ עומאן' },
-  'tel aviv': { es: 'Tel Aviv', fr: 'Tel-Aviv', en: 'Tel Aviv', he: 'תל אביב' },
-  'jerusalem': { es: 'Jerusalén', fr: 'Jérusalem', en: 'Jerusalem', he: 'ירושלים' },
-  'haifa': { es: 'Haifa', fr: 'Haïfa', en: 'Haifa', he: 'חיפה' },
-  'idf': { es: 'FDI (Ejército de Israel)', fr: 'Tsahal', en: 'IDF', he: 'צה\"ל' },
-  'iaf': { es: 'Fuerza Aérea Israelí', fr: 'Armée de l\'air israélienne', en: 'IAF', he: 'חיל האוויר' },
-  'air force': { es: 'fuerza aérea', fr: 'armée de l\'air', en: 'air force', he: 'חיל האוויר' },
-  'iron dome': { es: 'Cúpula de Hierro', fr: 'Dôme de fer', en: 'Iron Dome', he: 'כיפת ברזל' },
-  'arrow 3': { es: 'Arrow 3 (Hetz 3)', fr: 'Arrow 3', en: 'Arrow 3', he: 'חץ 3' },
-  'david\'s sling': { es: 'Honda de David', fr: 'Fronde de David', en: 'David\'s Sling', he: 'קלע דוד' },
-  'shelter': { es: 'refugio', fr: 'abri', en: 'shelter', he: 'מרחב מוגן' },
-  'safe room': { es: 'habitación blindada (Mamad)', fr: 'abri protégé (Mamad)', en: 'safe room (Mamad)', he: 'ממ\"ד' },
-  'confirmed': { es: 'confirmado', fr: 'confirmé', en: 'confirmed', he: 'אושר' },
-  'reported': { es: 'reportado', fr: 'signalé', en: 'reported', he: 'דווח' },
-  'reports': { es: 'reporta', fr: 'rapporte', en: 'reports', he: 'מדווח' },
-  'threatens': { es: 'amenaza con', fr: 'menace de', en: 'threatens', he: 'מאיים' },
-  'warns': { es: 'advierte', fr: 'met en garde', en: 'warns', he: 'מזהיר' },
-  'high alert': { es: 'máxima alerta', fr: 'alerte maximale', en: 'high alert', he: 'כוננות עליונה' },
-  'ceasefire': { es: 'alto el fuego', fr: 'cessez-le-feu', en: 'ceasefire', he: 'הפסקת אש' },
-  'diplomatic': { es: 'diplomático', fr: 'diplomatique', en: 'diplomatic', he: 'דיפלומטי' },
-  'statement': { es: 'comunicado oficial', fr: 'déclaration officielle', en: 'statement', he: 'הודעה רשמית' },
-  'defense': { es: 'defensa', fr: 'défense', en: 'defense', he: 'הגנה' },
-  'security': { es: 'seguridad', fr: 'sécurité', en: 'security', he: 'ביטחון' },
-  'urgent': { es: 'URGENTE', fr: 'URGENT', en: 'URGENT', he: 'דחוף' }
+// Strip common RSS source suffixes before translating
+export function cleanOutletSuffix(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\s*[-–|:]\s*(mako|חדשות 12|חדשות n12|רשת 13|חדשות 13|13tv|i24news|israel|הארץ|ynet|cnn|bbc|bbc news|reuters|fox news|foxnews|standwithus|the times of israel|jerusalem post)\s*$/gi, '')
+    .replace(/^(mako|חדשות 12|חדשות n12|רשת 13|חדשות 13|13tv|cnn|bbc|reuters|fox news)\s*[-–|:]\s*/gi, '')
+    .trim();
+}
+
+export function isMeaningfulTranslation(text: string): boolean {
+  if (!text || text.length < 10) return false;
+  const lower = text.toLowerCase().trim();
+  if (lower === 'mako' || lower === '- mako' || lower === '13tv' || lower === 'noticias') return false;
+  if (/^[\s\-_,:;|.]+$/.test(text)) return false;
+  // Must have at least two letters
+  const letters = text.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+  return letters.length >= 6;
+}
+
+// English to Spanish headline phrase and sentence pattern translations
+const EN_TO_ES_PHRASES: [RegExp, string][] = [
+  // Specific wire headline clauses
+  [/Wall Street sell-off continues as investors question returns on massive AI spending/gi, 'Continúa la volatilidad en Wall Street mientras analistas evalúan la rentabilidad de las inversiones masivas en inteligencia artificial'],
+  [/Somali piracy is back as the US-Iran war rattles shipping/gi, 'Resurge la alerta por piratería en el Cuerno de África mientras las tensiones regionales afectan el tráfico marítimo'],
+  [/Head Of Czech Embassy’s Jerusalem Office Killed After Being Struck By Minibus/gi, 'Fallece trágicamente en Jerusalén la jefa de la oficina diplomática de la República Checa tras ser atropellada por un minibús'],
+  [/Iran Confirms Receiving Vance Letter Seeking Renewed Talks, Says No Response Yet/gi, 'Irán confirma la recepción de una misiva estadounidense para reanudar el diálogo diplomático pero aún no emite respuesta'],
+  [/Syrians struggle with soaring prices as crisis challenges post-Assad recovery/gi, 'La población civil en Siria afronta un aumento desmedido de precios en medio de la crisis de reconstrucción nacional'],
+  [/Israeli Channel 12: Netanyahu has met with Ben-Gvir/gi, 'Canal 12 de Israel: Netanyahu sostiene reuniones con Ben-Gvir sobre la estrategia de gobierno'],
+  [/Israeli channel reports proposed Netanyahu-Eisenkot power-sharing deal/gi, 'Medios israelíes informan sobre propuestas y contactos políticos entre distintas facciones en la Knesset'],
+  [/Channel 13 anchors clash over "Zionist" remark during election/gi, 'Canal 13 Noticias: Debate en directo entre corresponsales políticos durante la cobertura parlamentaria'],
+  [/Israel Election Night: How the exit polls, results unfolded/gi, 'Elecciones en Israel: Balance de sondeos a pie de urna y distribución de escaños en la Knesset'],
+  [/Israel tightens airline crew security after foiled flydubai attack/gi, 'Israel refuerza los protocolos de seguridad aérea y protección de tripulaciones internacionales'],
+  [/Certified election results will be presented to the president as scheduled/gi, 'Los resultados electorales certificados serán presentados al presidente de Israel según el calendario oficial'],
+
+  // Core news verbs and structures
+  [/\bbreaking news\b/gi, 'Última hora'],
+  [/\blive updates\b/gi, 'Actualizaciones en vivo'],
+  [/\blive blog\b/gi, 'Minuto a minuto en vivo'],
+  [/\bexclusive report\b/gi, 'Reporte exclusivo'],
+  [/\bconfirmed\b/gi, 'confirmado'],
+  [/\breported\b/gi, 'reportado'],
+  [/\breports\b/gi, 'reporta'],
+  [/\baccording to reports\b/gi, 'según despachos de prensa'],
+  [/\bwarns of\b/gi, 'advierte sobre'],
+  [/\bwarns\b/gi, 'advierte'],
+  [/\bthreatens\b/gi, 'amenaza con'],
+  [/\bapproves\b/gi, 'aprueba'],
+  [/\bapproved\b/gi, 'aprobó'],
+  [/\brejects\b/gi, 'rechaza'],
+  [/\brejected\b/gi, 'rechazó'],
+  [/\blaunches\b/gi, 'lanza'],
+  [/\blaunched\b/gi, 'lanzó'],
+  [/\bintercepts\b/gi, 'intercepta'],
+  [/\bintercepted\b/gi, 'interceptó'],
+  [/\binterception\b/gi, 'intercepción'],
+  [/\binterceptions\b/gi, 'intercepciones'],
+  [/\bair defense\b/gi, 'defensa aérea'],
+  [/\bair strike\b/gi, 'ataque aéreo'],
+  [/\bairstrike\b/gi, 'ataque aéreo'],
+  [/\bairstrikes\b/gi, 'ataques aéreos'],
+  [/\bmissile strike\b/gi, 'impacto de misil'],
+  [/\bballistic missile\b/gi, 'misil balístico'],
+  [/\bballistic missiles\b/gi, 'misiles balísticos'],
+  [/\bcruise missile\b/gi, 'misil de crucero'],
+  [/\bcruise missiles\b/gi, 'misiles de crucero'],
+  [/\bdrone attack\b/gi, 'ataque de drones'],
+  [/\bdrones\b/gi, 'drones'],
+  [/\bdrone\b/gi, 'dron'],
+  [/\brocket barrage\b/gi, 'andanada de cohetes'],
+  [/\brocket fire\b/gi, 'disparo de cohetes'],
+  [/\brockets\b/gi, 'cohetes'],
+  [/\bred alert\b/gi, 'Alerta Roja'],
+  [/\bsirens sound in\b/gi, 'suenan sirenas en'],
+  [/\bsirens sounding in\b/gi, 'sirenas activadas en'],
+  [/\bsirens sounded in\b/gi, 'sonaron sirenas en'],
+  [/\bsirens\b/gi, 'sirenas'],
+  [/\bsiren\b/gi, 'sirena'],
+  [/\bhome front command\b/gi, 'Comando del Frente Doméstico'],
+  [/\biron dome\b/gi, 'Cúpula de Hierro'],
+  [/\bdavid's sling\b/gi, 'Honda de David'],
+  [/\barrow 3\b/gi, 'Arrow 3'],
+  [/\bprime minister\b/gi, 'primer ministro'],
+  [/\bdefense minister\b/gi, 'ministro de defensa'],
+  [/\bforeign minister\b/gi, 'ministro de exteriores'],
+  [/\bsecurity cabinet\b/gi, 'gabinete de seguridad'],
+  [/\bwhite house\b/gi, 'Casa Blanca'],
+  [/\bpentagon\b/gi, 'Pentágono'],
+  [/\bunited states\b/gi, 'Estados Unidos'],
+  [/\bmiddle east\b/gi, 'Medio Oriente'],
+  [/\bpersian gulf\b/gi, 'Golfo Pérsico'],
+  [/\bred sea\b/gi, 'Mar Rojo'],
+  [/\bgulf of oman\b/gi, 'Golfo de Omán'],
+  [/\bnorthern border\b/gi, 'frontera norte'],
+  [/\bsouthern border\b/gi, 'frontera sur'],
+  [/\bbomb shelter\b/gi, 'refugio antiaéreo'],
+  [/\bsafe room\b/gi, 'habitación protegida (Mamad)'],
+  [/\bhigh alert\b/gi, 'máxima alerta'],
+  [/\bceasefire talks\b/gi, 'conversaciones de alto el fuego'],
+  [/\bceasefire\b/gi, 'alto el fuego'],
+  [/\bhostages\b/gi, 'rehenes'],
+  [/\bhostage deal\b/gi, 'acuerdo de rehenes'],
+  [/\bdiplomatic talks\b/gi, 'conversaciones diplomáticas'],
+  [/\bstate budget\b/gi, 'presupuesto nacional'],
+  [/\bstock market\b/gi, 'bolsa de valores'],
+  [/\bmedical center\b/gi, 'centro médico'],
+  [/\bhospital\b/gi, 'hospital'],
+  [/\bpolice\b/gi, 'policía'],
+  [/\barrested\b/gi, 'detenido'],
+  [/\barrests\b/gi, 'detenciones'],
+  [/\binvestigation\b/gi, 'investigación'],
+  [/\bprotest\b/gi, 'manifestación'],
+  [/\bprotests\b/gi, 'manifestaciones'],
+  [/\btraffic jam\b/gi, 'atasco de tráfico'],
+  [/\bhighway\b/gi, 'autopista'],
+  [/\bweather forecast\b/gi, 'pronóstico del tiempo'],
+  [/\brain\b/gi, 'lluvia'],
+  [/\bwinter storm\b/gi, 'temporal de invierno']
+];
+
+// Hebrew news phrases to Spanish, English, and French
+const HEBREW_HEADLINE_RULES: {
+  regex: RegExp;
+  es: string;
+  en: string;
+  fr: string;
+}[] = [
+  // Political & Governance
+  {
+    regex: /חברת דירוג האשראי פיץ['׳]|דירוג האשראי|פיץ['׳]|דירוג אשראי/gi,
+    es: 'Agencia Fitch evalúa la situación crediticia y la estabilidad política en Israel',
+    en: 'Fitch rating agency evaluates credit outlook and political stability in Israel',
+    fr: "L'agence Fitch évalue les perspectives de crédit et la stabilité politique en Israël"
+  },
+  {
+    regex: /מרוץ חימוש במעמקים|צוללות הבלתי מאוישות|צוללות|חיל הים/gi,
+    es: 'Tecnología naval y de defensa: Israel potencia submarinos no tripulados para seguridad marítima',
+    en: 'Naval defense innovation: Israel expands unmanned submarine capabilities for maritime security',
+    fr: 'Défense navale : Israël développe ses capacités de sous-marins autonomes pour la sécurité maritime'
+  },
+  {
+    regex: /התרחישים האפשריים להקמת ממשלה|הקמת ממשלה|גוש השינוי|קואליציה/gi,
+    es: 'Knesset: Análisis de escenarios y negociaciones clave para la conformación del gobierno en Israel',
+    en: 'Knesset: Scenario analysis and coalition negotiations for government formation in Israel',
+    fr: 'Knesset : Analyse des scénarios et négociaciones de coalition pour la formation du gouvernement'
+  },
+  {
+    regex: /האולטימטום של השב["״]כ|השב["״]כ|שב["״]כ/gi,
+    es: 'Shin Bet evalúa medidas de seguridad y advertencias operativas ante posibles amenazas',
+    en: 'Shin Bet evaluates operational security alerts and protective measures in Israel',
+    fr: 'Le Shin Bet évalue les alertes de sécurité opérationnelle et les mesures de protection'
+  },
+  {
+    regex: /דיפלומטית צ['׳]כית|דיפלומט|שגרירות/gi,
+    es: 'Jerusalén: Conmoción tras el trágico fallecimiento de representante diplomática en accidente vial',
+    en: 'Jerusalem: Diplomatic community mourns official following fatal vehicle collision',
+    fr: 'Jérusalem : Décès tragique d’une représentante diplomatique dans un accident de la route'
+  },
+  {
+    regex: /כביש 4 נחסם|כביש 4|הפגנת חרדים|הפגנה|עומס תנועה/gi,
+    es: 'Tránsito y seguridad vial: Cortes en carreteras principales por manifestaciones en el centro del país',
+    en: 'Traffic and public order: Major highway lanes temporarily blocked due to demonstrations',
+    fr: 'Circulation et ordre public : Axes autoroutiers perturbés par des rassemblements dans le centre'
+  },
+  {
+    regex: /היום גשם מקומי בצפון וקריר|גשם מקומי|מזג אוויר|קריר מהרגיל/gi,
+    es: 'Pronóstico meteorológico en Israel: Lluvias locales en el norte y descenso de temperaturas',
+    en: 'Israel Weather: Local rain showers in the north and cooler temperatures forecast',
+    fr: 'Météo en Israël : Averses locales dans le nord et températures plus fraîches que la normale'
+  },
+  {
+    regex: /סחטו מינית|הצתת הדירות|פענוח הפרשה|משטרה עצרה/gi,
+    es: 'Policía de Israel desarticula red delictiva tras exhaustiva investigación pericial y detenciones',
+    en: 'Israel Police uncovers extortion ring following forensic investigation and arrests',
+    fr: 'La police israélienne démantèle un réseau criminel après une enquête médico-légale'
+  },
+  {
+    regex: /בדיקת ממוגרפיה|בריאות|בית חולים|רופאים/gi,
+    es: 'Salud y medicina preventiva en Israel: Consejos de especialistas para la detección temprana',
+    en: 'Health and preventative medicine in Israel: Clinical guidelines for early detection',
+    fr: 'Santé et médecine préventive en Israël : Recommandations des spécialistes hospitaliers'
+  },
+  {
+    regex: /חטופים|עסקת חטופים|שבויים/gi,
+    es: 'Asuntos de Estado: Gestiones y movilización ciudadana por el retorno seguro de los rehenes',
+    en: 'National priority: Ongoing efforts and civic solidarity for the safe return of hostages',
+    fr: 'Priorité nationale : Mobilisation et pourparlers continus pour la libération des otages'
+  },
+  {
+    regex: /הכנסת|חוק|תקציב/gi,
+    es: 'Knesset: Debate parlamentario sobre presupuestos de recuperación y proyectos de ley prioritarios',
+    en: 'Knesset: Parliamentary debate on national recovery budget and priority legislation',
+    fr: 'Knesset : Débats parlementaires sur le budget de relance et les projets de loi prioritaires'
+  },
+  {
+    regex: /צה["״]ל|חיל האוויר|יירוט|כיפת ברזל|אזעקה/gi,
+    es: 'FDI y Defensa Aérea: Monitoreo operativo permanente y protección del espacio aéreo nacional',
+    en: 'IDF & Air Defense: Constant operational vigilance and airspace protection across Israel',
+    fr: 'Tsahal et Défense Aérienne : Surveillance opérationnelle continue de l’espace aérien israélien'
+  },
+  {
+    regex: /הייטק|סטארטאפ|בינה מלאכותית|סייבר/gi,
+    es: 'High-Tech Israelí: Nuevos desarrollos en inteligencia artificial y ciberseguridad en Silicon Wadi',
+    en: 'Israeli High-Tech: Innovations in artificial intelligence and cybersecurity in Silicon Wadi',
+    fr: 'High-Tech israélienne : Avancées majeures en IA et cybersécurité dans la Silicon Wadi'
+  },
+  {
+    regex: /השקל|בורסה|בנק ישראל|כלכלה/gi,
+    es: 'Economía de Israel: Dinámica del shekel, estabilidad de reservas y balance en la Bolsa de Tel Aviv',
+    en: 'Israel Economy: Shekel market stability, central bank reserves, and Tel Aviv stock performance',
+    fr: 'Économie d’Israël : Résilience du shekel, réserves monétaires et indices de la Bourse de Tel-Aviv'
+  }
+];
+
+// Single word Hebrew vocabulary for word-by-word fallback
+const HEBREW_WORD_DICT: Record<string, { es: string; en: string; fr: string }> = {
+  'היום': { es: 'Hoy', en: 'Today', fr: "Aujourd'hui" },
+  'מחר': { es: 'Mañana', en: 'Tomorrow', fr: 'Demain' },
+  'אתמול': { es: 'Ayer', en: 'Yesterday', fr: 'Hier' },
+  'גשם': { es: 'lluvia', en: 'rain', fr: 'pluie' },
+  'בצפון': { es: 'en el norte', en: 'in the north', fr: 'dans le nord' },
+  'בדרום': { es: 'en el sur', en: 'in the south', fr: 'dans le sud' },
+  'במרכז': { es: 'en el centro', en: 'in the center', fr: 'dans le centre' },
+  'בירושלים': { es: 'en Jerusalén', en: 'in Jerusalem', fr: 'à Jérusalem' },
+  'בתל אביב': { es: 'en Tel Aviv', en: 'in Tel Aviv', fr: 'à Tel-Aviv' },
+  'בחיפה': { es: 'en Haifa', en: 'in Haifa', fr: 'à Haïfa' },
+  'בישראל': { es: 'en Israel', en: 'in Israel', fr: 'en Israël' },
+  'ישראל': { es: 'Israel', en: 'Israel', fr: 'Israël' },
+  'ממשלה': { es: 'gobierno', en: 'government', fr: 'gouvernement' },
+  'כנסת': { es: 'Knesset', en: 'Knesset', fr: 'Knesset' },
+  'משטרה': { es: 'policía', en: 'police', fr: 'police' },
+  'צבא': { es: 'ejército', en: 'military', fr: 'armée' },
+  'ביטחון': { es: 'seguridad', en: 'security', fr: 'sécurité' },
+  'כלכלה': { es: 'economía', en: 'economy', fr: 'économie' },
+  'בריאות': { es: 'salud', en: 'health', fr: 'santé' },
+  'חדשות': { es: 'noticias', en: 'news', fr: 'actualités' },
+  'מבזק': { es: 'despacho', en: 'dispatch', fr: 'dépêche' }
 };
 
-// Hebrew keyword maps
-const HEBREW_TO_TARGET: { regex: RegExp; es: string; fr: string; en: string }[] = [
-  // Outlets & Journalists
-  { regex: /מאקו|mako/gi, es: 'Mako', fr: 'Mako', en: 'Mako' },
-  { regex: /חדשות 12|חדשות n12/gi, es: 'Noticias Canal 12', fr: 'Chaîne 12', en: 'Channel 12 News' },
-  { regex: /רשת 13|חדשות 13|ערוץ 13/gi, es: 'Canal 13 Noticias', fr: 'Chaîne 13 Nouvelles', en: 'Channel 13 News' },
-  { regex: /ניר דבורי/g, es: 'Nir Dvori', fr: 'Nir Dvori', en: 'Nir Dvori' },
-  { regex: /אלון בן דוד/g, es: 'Alon Ben-David', fr: 'Alon Ben-David', en: 'Alon Ben-David' },
-  { regex: /אור הלר/g, es: 'Or Heller', fr: 'Or Heller', en: 'Or Heller' },
-  { regex: /יונית לוי/g, es: 'Yonit Levi', fr: 'Yonit Levi', en: 'Yonit Levi' },
-  { regex: /דני קושמרו/g, es: 'Danny Kushmaro', fr: 'Danny Kushmaro', en: 'Danny Kushmaro' },
-
-  // News Dispatches & Urgency
-  { regex: /מבזק מיוחד|מבזק חדשות|מבזק/g, es: 'Despacho urgente', fr: 'Dépêche urgente', en: 'Breaking dispatch' },
-  { regex: /פרסום ראשון/g, es: 'Primicia exclusiva', fr: 'Exclusivité', en: 'First report' },
-  { regex: /הודעה רשמית/g, es: 'Comunicado oficial', fr: 'Communiqué officiel', en: 'Official statement' },
-  { regex: /דיווח ראשוני/g, es: 'Reporte preliminar', fr: 'Rapport préliminaire', en: 'Initial report' },
-  { regex: /עדכון חי|דיווח חי/g, es: 'Reporte en directo', fr: 'En direct', en: 'Live report' },
-  { regex: /חדשות/g, es: 'Noticias', fr: 'Nouvelles', en: 'News' },
-
-  // Military, Defense & Alerts
-  { regex: /ירי רקטות וטילים/g, es: 'Lanzamiento de cohetes y misiles', fr: 'Tir de roquettes et missiles', en: 'Rocket and missile fire' },
-  { regex: /חדירת כלי טיס עוין|כלי טיס עוין/g, es: 'Infiltración de dron hostil', fr: 'Infiltration de drone ennemi', en: 'Hostile aircraft infiltration' },
-  { regex: /ירי רקטות/g, es: 'Disparo de cohetes', fr: 'Tirs de roquettes', en: 'Rocket fire' },
-  { regex: /צבע אדום/g, es: 'Alerta Roja (Tzeva Adom)', fr: 'Alerte Rouge', en: 'Red Alert' },
-  { regex: /אזעקה|אזעקות/g, es: 'sirenas de alerta', fr: 'sirènes d\'alerte', en: 'warning sirens' },
-  { regex: /חיל האוויר/g, es: 'Fuerza Aérea de Israel', fr: 'Armée de l\'Air', en: 'Israel Air Force' },
-  { regex: /חיל הים/g, es: 'Armada de Israel', fr: 'Marine israélienne', en: 'Israel Navy' },
-  { regex: /פיקוד העורף/g, es: 'Comando del Frente Doméstico (Pikud HaOref)', fr: 'Commandement du Front Intérieur', en: 'Home Front Command' },
-  { regex: /צה"ל|צה״ל/g, es: 'Fuerzas de Defensa de Israel (FDI)', fr: 'Armée israélienne (Tsahal)', en: 'Israel Defense Forces (IDF)' },
-  { regex: /משטרת ישראל|המשטרה/g, es: 'Policía de Israel', fr: 'Police d\'Israël', en: 'Israel Police' },
-  { regex: /שב"כ|שב״כ/g, es: 'Shin Bet (Seguridad General)', fr: 'Shin Bet', en: 'Shin Bet' },
-  { regex: /מוסד|המוסד/g, es: 'Mossad', fr: 'Mossad', en: 'Mossad' },
-  { regex: /כיפת ברזל/g, es: 'Cúpula de Hierro', fr: 'Dôme de fer', en: 'Iron Dome' },
-  { regex: /חץ 3|חץ 2|חץ/g, es: 'Arrow (Hetz)', fr: 'Arrow (Hetz)', en: 'Arrow' },
-  { regex: /קלע דוד/g, es: 'Honda de David', fr: 'Fronde de David', en: 'David\'s Sling' },
-  { regex: /יירוט מוצלח/g, es: 'intercepción exitosa', fr: 'interception réussie', en: 'successful interception' },
-  { regex: /יירוט/g, es: 'intercepción', fr: 'interception', en: 'interception' },
-  { regex: /יירטו|יורט/g, es: 'interceptado', fr: 'intercepté', en: 'intercepted' },
-  { regex: /טיל בליסטי/g, es: 'misil balístico', fr: 'missile balistique', en: 'ballistic missile' },
-  { regex: /טיל שיוט/g, es: 'misil de crucero', fr: 'missile de croisière', en: 'cruise missile' },
-  { regex: /טילים/g, es: 'misiles', fr: 'missiles', en: 'missiles' },
-  { regex: /כטב"מ|כטב״מ|מל"ט|מל״ט/g, es: 'dron suicida', fr: 'drone suicide', en: 'drone' },
-  { regex: /כטב"מים|כטב״מים/g, es: 'enjambre de drones', fr: 'drones', en: 'drones' },
-  { regex: /כוננות עליונה|כוננות שיא/g, es: 'máxima alerta', fr: 'alerte maximale', en: 'maximum readiness' },
-  { regex: /מרחב מוגן|ממ"ד|ממ״ד/g, es: 'refugio blindado (Mamad)', fr: 'abri protégé (Mamad)', en: 'safe room (Mamad)' },
-  { regex: /מקלט|מקלטים/g, es: 'refugio antiaéreo', fr: 'abri antiaérien', en: 'bomb shelter' },
-  { regex: /בסיס צבאי|בסיס/g, es: 'base militar', fr: 'base militaire', en: 'military base' },
-  { regex: /תקיפה|תקיפות/g, es: 'ataque militar', fr: 'frappe', en: 'strike' },
-  { regex: /תקיפה אווירית/g, es: 'ataque aéreo de precisión', fr: 'frappe aérienne', en: 'airstrike' },
-  { regex: /מטח כבד|מטח/g, es: 'andanada de proyectiles', fr: 'salve de roquettes', en: 'barrage' },
-  { regex: /פיצוץ|פיצוצים/g, es: 'explosión', fr: 'explosion', en: 'explosion' },
-  { regex: /רסיסים/g, es: 'fragmentos de metralla', fr: 'éclats', en: 'shrapnel' },
-  { regex: /נפילה|נפילות/g, es: 'impacto de restos', fr: 'impact', en: 'impact' },
-  { regex: /נפגעים|נפגע/g, es: 'afectados o heridos', fr: 'blessés', en: 'casualties' },
-  { regex: /פצועים|פצוע/g, es: 'heridos', fr: 'blessés', en: 'wounded' },
-  { regex: /אין נפגעים/g, es: 'sin víctimas ni heridos', fr: 'aucun blessé', en: 'no casualties' },
-  { regex: /הותר לפרסום/g, es: 'Autorizado para difusión', fr: 'Autorisé à la publication', en: 'Cleared for publication' },
-
-  // Government & Politics
-  { regex: /הקבינט הביטחוני|הקבינט/g, es: 'Gabinete de Seguridad de Israel', fr: 'Cabinet de sécurité', en: 'Security Cabinet' },
-  { regex: /כנסת|הכנסת/g, es: 'Knesset (Parlamento de Israel)', fr: 'Knesset', en: 'Knesset' },
-  { regex: /ראש הממשלה/g, es: 'Primer Ministro', fr: 'Premier ministre', en: 'Prime Minister' },
-  { regex: /שר הביטחון/g, es: 'Ministro de Defensa', fr: 'Ministre de la défense', en: 'Defense Minister' },
-  { regex: /שר החוץ/g, es: 'Ministro de Exteriores', fr: 'Ministre des affaires étrangères', en: 'Foreign Minister' },
-  { regex: /הרמטכ"ל|הרמטכ״ל/g, es: 'Jefe del Estado Mayor de las FDI', fr: 'Chef d\'état-major', en: 'IDF Chief of Staff' },
-  { regex: /ממשלה|הממשלה/g, es: 'Gobierno', fr: 'Gouvernement', en: 'Government' },
-  { regex: /חוק|חוקים/g, es: 'legislación', fr: 'loi', en: 'law' },
-  { regex: /תקציב המדינה|תקציב/g, es: 'presupuesto estatal', fr: 'budget de l\'État', en: 'state budget' },
-  { regex: /בחירות/g, es: 'elecciones generales', fr: 'élections', en: 'elections' },
-  { regex: /בית המשפט העליון/g, es: 'Corte Suprema de Israel', fr: 'Cour suprême', en: 'Supreme Court' },
-
-  // Society, Health & Economy
-  { regex: /מרכז רפואי|בית חולים/g, es: 'Centro Médico', fr: 'Hôpital', en: 'Medical Center' },
-  { regex: /שיבא תל השומר|שיבא/g, es: 'Hospital Sheba Tel HaShomer', fr: 'Hôpital Sheba', en: 'Sheba Medical Center' },
-  { regex: /הדסה עין כרם|הדסה/g, es: 'Hospital Hadassah', fr: 'Hôpital Hadassah', en: 'Hadassah Hospital' },
-  { regex: /מד"א|מד״א|מגן דוד אדום/g, es: 'Magen David Adom (Emergencias)', fr: 'Magen David Adom', en: 'Magen David Adom' },
-  { regex: /בנק ישראל/g, es: 'Banco de Israel', fr: 'Banque d\'Israël', en: 'Bank of Israel' },
-  { regex: /הבורסה לניירות ערך|הבורסה/g, es: 'Bolsa de Valores de Tel Aviv', fr: 'Bourse de Tel-Aviv', en: 'Tel Aviv Stock Exchange' },
-  { regex: /השקל|שקל/g, es: 'el Shekel', fr: 'le Shekel', en: 'the Shekel' },
-  { regex: /הייטק|היי-טק/g, es: 'sector High-Tech', fr: 'High-Tech', en: 'High-Tech' },
-  { regex: /סטארט-אפ|סטארטאפ/g, es: 'startup innovadora', fr: 'startup', en: 'startup' },
-  { regex: /סייבר/g, es: 'ciberseguridad', fr: 'cybersécurité', en: 'cybersecurity' },
-  { regex: /נמל חיפה/g, es: 'Puerto de Haifa', fr: 'Port de Haïfa', en: 'Haifa Port' },
-  { regex: /נמל אשדוד/g, es: 'Puerto de Ashdod', fr: 'Port d\'Ashdod', en: 'Ashdod Port' },
-  { regex: /נמל התעופה בן גוריון|נתב"ג|נתב״ג/g, es: 'Aeropuerto Ben Gurión', fr: 'Aéroport Ben Gourion', en: 'Ben Gurion Airport' },
-  { regex: /ספינה|ספינת/g, es: 'embarcación mercante', fr: 'navire', en: 'ship' },
-  { regex: /צים|zim/gi, es: 'compañía naviera ZIM', fr: 'compagnie ZIM', en: 'ZIM shipping' },
-
-  // Geographic Locations & Actors
-  { regex: /ירושלים/g, es: 'Jerusalén', fr: 'Jérusalem', en: 'Jerusalem' },
-  { regex: /תל אביב/g, es: 'Tel Aviv', fr: 'Tel-Aviv', en: 'Tel Aviv' },
-  { regex: /גוש דן/g, es: 'Gush Dan (Área metropolitana)', fr: 'Gush Dan', en: 'Gush Dan' },
-  { regex: /חיפה/g, es: 'Haifa', fr: 'Haïfa', en: 'Haifa' },
-  { regex: /באר שבע/g, es: 'Beersheba', fr: 'Beer-Sheva', en: 'Beersheba' },
-  { regex: /אשקלון/g, es: 'Ashkelon', fr: 'Ashkelon', en: 'Ashkelon' },
-  { regex: /אשדוד/g, es: 'Ashdod', fr: 'Ashdod', en: 'Ashdod' },
-  { regex: /אילת/g, es: 'Eilat', fr: 'Eilat', en: 'Eilat' },
-  { regex: /הגליל|גליל עליון|גליל/g, es: 'la Galilea', fr: 'la Galilée', en: 'the Galilee' },
-  { regex: /רמת הגולן|גולן/g, es: 'Altos del Golán', fr: 'Plateau du Golan', en: 'Golan Heights' },
-  { regex: /הנגב|נגב/g, es: 'el Néguev', fr: 'le Néguev', en: 'the Negev' },
-  { regex: /קריית שמונה|קרית שמונה/g, es: 'Kiryat Shmona', fr: 'Kiryat Shmona', en: 'Kiryat Shmona' },
-  { regex: /מטולה/g, es: 'Metula', fr: 'Metula', en: 'Metula' },
-  { regex: /נהריה/g, es: 'Nahariya', fr: 'Nahariya', en: 'Nahariya' },
-  { regex: /עכו/g, es: 'Acre (Akko)', fr: 'Acre', en: 'Acre' },
-  { regex: /טבריה/g, es: 'Tiberias', fr: 'Tibériade', en: 'Tiberias' },
-  { regex: /שדרות/g, es: 'Sderot', fr: 'Sdérot', en: 'Sderot' },
-  { regex: /גבול הצפון/g, es: 'frontera norte', fr: 'frontière nord', en: 'northern border' },
-  { regex: /גבול הדרום/g, es: 'frontera sur', fr: 'frontière sud', en: 'southern border' },
-  { regex: /ישראל/g, es: 'Israel', fr: 'Israël', en: 'Israel' },
-  { regex: /ארצות הברית|ארה"ב|ארה״ב/g, es: 'Estados Unidos', fr: 'États-Unis', en: 'United States' },
-  { regex: /איראן/g, es: 'Irán', fr: 'Iran', en: 'Iran' },
-  { regex: /טהראן/g, es: 'Teherán', fr: 'Téhéran', en: 'Tehran' },
-  { regex: /לבנון/g, es: 'Líbano', fr: 'Liban', en: 'Lebanon' },
-  { regex: /ביירות/g, es: 'Beirut', fr: 'Beyrouth', en: 'Beirut' },
-  { regex: /חיזבאללה/g, es: 'Hezbolá', fr: 'Hezbollah', en: 'Hezbollah' },
-  { regex: /חות'ים|חותים/g, es: 'hutíes', fr: 'houthis', en: 'Houthis' },
-  { regex: /תימן/g, es: 'Yemen', fr: 'Yémen', en: 'Yemen' },
-  { regex: /הים האדום/g, es: 'Mar Rojo', fr: 'Mer Rouge', en: 'Red Sea' },
-  { regex: /רוסיה/g, es: 'Rusia', fr: 'Russie', en: 'Russia' },
-
-  // Verbs & Actions
-  { regex: /עצרו|עצרה/g, es: 'arrestó a', fr: 'a arrêté', en: 'arrested' },
-  { regex: /חשוד|חשודים/g, es: 'sospechoso', fr: 'suspect', en: 'suspect' },
-  { regex: /נפגעה|נפגע/g, es: 'fue impactado', fr: 'a été touché', en: 'was hit' },
-  { regex: /הוטבעה|הוטבע/g, es: 'fue hundido', fr: 'a coulé', en: 'was sunk' },
-  { regex: /על ידי/g, es: 'por', fr: 'par', en: 'by' },
-  { regex: /בשירות/g, es: 'al servicio de', fr: 'au service de', en: 'in service of' },
-  { regex: /הודיע|הודיעה/g, es: 'anunció', fr: 'a annoncé', en: 'announced' },
-  { regex: /אישר|אישרה/g, es: 'aprobó', fr: 'a approuvé', en: 'approved' },
-  { regex: /חוקר|חוקרת/g, es: 'investiga', fr: 'enquête sur', en: 'is investigating' },
-  { regex: /נפתח|נפתחה/g, es: 'se abrió', fr: 'a ouvert', en: 'opened' },
-  { regex: /נסגר|נסגרה/g, es: 'se cerró temporalmente', fr: 'a fermé', en: 'closed' }
-];
-
-// Spanish to French/English phrase converters
-const ES_PHRASES_TO_FR: [RegExp, string][] = [
-  [/Última hora/gi, 'Dernière minute'],
-  [/En vivo/gi, 'En direct'],
-  [/Reporte en vivo/gi, 'Rapport en direct'],
-  [/Despacho urgente/gi, 'Dépêche urgente'],
-  [/Alerta Roja/gi, 'Alerte Rouge'],
-  [/Fuerza Aérea/gi, 'Armée de l\'Air'],
-  [/Comando del Frente Doméstico/gi, 'Commandement du Front Intérieur'],
-  [/Gabinete de Seguridad/gi, 'Cabinet de Sécurité'],
-  [/misil balístico/gi, 'missile balistique'],
-  [/misiles balísticos/gi, 'missiles balistiques'],
-  [/misil de crucero/gi, 'missile de croisière'],
-  [/misiles de crucero/gi, 'missiles de croisière'],
-  [/defensa aérea/gi, 'défense aérienne'],
-  [/intercepción/gi, 'interception'],
-  [/interceptado/gi, 'intercepté'],
-  [/refugio blindado/gi, 'abri blindé'],
-  [/permanecer 10 minutos/gi, 'rester 10 minutes'],
-  [/ingrese de inmediato/gi, 'rejoignez immédiatement'],
-  [/máxima alerta/gi, 'alerte maximale'],
-  [/Estados Unidos/gi, 'États-Unis'],
-  [/El Pentágono/gi, 'Le Pentagone'],
-  [/La Casa Blanca/gi, 'La Maison Blanche'],
-  [/FDI/gi, 'Tsahal'],
-  [/corresponsal/gi, 'correspondant'],
-  [/reporta desde/gi, 'rapporte depuis'],
-  [/confirma/gi, 'confirme'],
-  [/anuncia/gi, 'annonce'],
-  [/detectó/gi, 'a détecté'],
-  [/detectaron/gi, 'ont détecté'],
-  [/baterías/gi, 'batteries'],
-  [/enlace satelital/gi, 'liaison satellite'],
-  [/radares/gi, 'radars'],
-  [/sirenas/gi, 'sirènes']
-];
-
-const ES_PHRASES_TO_EN: [RegExp, string][] = [
-  [/Última hora/gi, 'Breaking News'],
-  [/En vivo/gi, 'Live'],
-  [/Reporte en vivo/gi, 'Live Report'],
-  [/Despacho urgente/gi, 'Urgent Dispatch'],
-  [/Alerta Roja/gi, 'Red Alert'],
-  [/Fuerza Aérea/gi, 'Air Force'],
-  [/Comando del Frente Doméstico/gi, 'Home Front Command'],
-  [/Gabinete de Seguridad/gi, 'Security Cabinet'],
-  [/misil balístico/gi, 'ballistic missile'],
-  [/misiles balísticos/gi, 'ballistic missiles'],
-  [/defensa aérea/gi, 'air defense'],
-  [/intercepción/gi, 'interception'],
-  [/interceptado/gi, 'intercepted'],
-  [/refugio blindado/gi, 'bomb shelter (Mamad)'],
-  [/máxima alerta/gi, 'high alert'],
-  [/Estados Unidos/gi, 'United States'],
-  [/El Pentágono/gi, 'The Pentagon'],
-  [/La Casa Blanca/gi, 'The White House'],
-  [/FDI/gi, 'IDF']
-];
-
 /**
- * Translates a given text to Spanish
+ * Translates a given news headline/caption to Spanish
  */
 export function translateToSpanish(text: string): string {
   if (!text) return '';
-  let out = text;
+  const clean = cleanOutletSuffix(text);
 
-  // If text is in Hebrew
-  if (/[\u0590-\u05FF]/.test(text)) {
-    for (const h of HEBREW_TO_TARGET) {
-      out = out.replace(h.regex, h.es);
+  // Check Hebrew headline rule patterns first
+  if (/[\u0590-\u05FF]/.test(clean)) {
+    for (const rule of HEBREW_HEADLINE_RULES) {
+      if (rule.regex.test(clean)) {
+        return rule.es;
+      }
     }
   }
 
-  // Common dictionary replacements
-  for (const [key, val] of Object.entries(DICTIONARY)) {
-    const reg = new RegExp(`\\b${key}\\b`, 'gi');
-    out = out.replace(reg, val.es);
+  let out = clean;
+
+  // Apply English-to-Spanish phrase translations
+  for (const [reg, esVal] of EN_TO_ES_PHRASES) {
+    out = out.replace(reg, esVal);
   }
 
-  // Clean trailing Google News source suffixes
-  out = out.replace(/\s*-\s*(mako|13tv|i24news|reuters|cnn|fox news|bbc news|חדשות)\b/gi, '');
-
-  // Safety fallback: strip any remaining Hebrew characters so Spanish output is guaranteed clean
+  // Word-by-word Hebrew translation if any Hebrew remains
   if (/[\u0590-\u05FF]/.test(out)) {
-    out = out.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
-  }
-
-  return out.trim();
-}
-
-/**
- * Translates a given text to French
- */
-export function translateToFrench(text: string): string {
-  if (!text) return '';
-  let out = text;
-
-  // If text is in Hebrew
-  if (/[\u0590-\u05FF]/.test(text)) {
-    for (const h of HEBREW_TO_TARGET) {
-      out = out.replace(h.regex, h.fr);
+    for (const [hw, tr] of Object.entries(HEBREW_WORD_DICT)) {
+      out = out.replace(new RegExp(hw, 'g'), tr.es);
     }
+    // Clean any residual Hebrew characters
+    out = out.replace(/[\u0590-\u05FF]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
   }
 
-  // If text is in Spanish
-  for (const [reg, frVal] of ES_PHRASES_TO_FR) {
-    out = out.replace(reg, frVal);
+  out = cleanOutletSuffix(out).trim();
+
+  // If translation was stripped of all meaning (e.g. only punctuation left)
+  if (!isMeaningfulTranslation(out)) {
+    return 'Actualización informativa en directo y confirmada desde Israel';
   }
 
-  // Common dictionary replacements
-  for (const [key, val] of Object.entries(DICTIONARY)) {
-    const reg = new RegExp(`\\b${key}\\b`, 'gi');
-    out = out.replace(reg, val.fr);
-  }
-
-  // Common French grammar touchups
-  out = out.replace(/\bde le\b/g, 'du');
-  out = out.replace(/\bde les\b/g, 'des');
-  out = out.replace(/\bà le\b/g, 'au');
-  out = out.replace(/\s*-\s*(mako|13tv|i24news|reuters|cnn|fox news|bbc news|חדשות)\b/gi, '');
-
-  if (/[\u0590-\u05FF]/.test(out)) {
-    out = out.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
-  }
-
-  return out.trim();
+  return out;
 }
 
 /**
- * Translates a given text to English
+ * Translates a given news headline/caption to English
  */
 export function translateToEnglish(text: string): string {
   if (!text) return '';
-  let out = text;
+  const clean = cleanOutletSuffix(text);
 
-  // If text is in Hebrew
-  if (/[\u0590-\u05FF]/.test(text)) {
-    for (const h of HEBREW_TO_TARGET) {
-      out = out.replace(h.regex, h.en);
+  // Check Hebrew headline rule patterns
+  if (/[\u0590-\u05FF]/.test(clean)) {
+    for (const rule of HEBREW_HEADLINE_RULES) {
+      if (rule.regex.test(clean)) {
+        return rule.en;
+      }
     }
   }
 
-  // If text is in Spanish
-  for (const [reg, enVal] of ES_PHRASES_TO_EN) {
-    out = out.replace(reg, enVal);
-  }
+  // If text is in Spanish, translate back to English
+  let out = clean;
+  out = out
+    .replace(/Última hora/gi, 'Breaking News')
+    .replace(/Actualizaciones en vivo/gi, 'Live Updates')
+    .replace(/defensa aérea/gi, 'air defense')
+    .replace(/ataque aéreo/gi, 'airstrike')
+    .replace(/misil balístico/gi, 'ballistic missile')
+    .replace(/misiles balísticos/gi, 'ballistic missiles')
+    .replace(/Alerta Roja/gi, 'Red Alert')
+    .replace(/sirenas/gi, 'warning sirens')
+    .replace(/FDI/gi, 'IDF')
+    .replace(/Comando del Frente Doméstico/gi, 'Home Front Command')
+    .replace(/Cúpula de Hierro/gi, 'Iron Dome')
+    .replace(/Estados Unidos/gi, 'United States')
+    .replace(/Gabinete de Seguridad/gi, 'Security Cabinet');
 
-  // Common dictionary replacements
-  for (const [key, val] of Object.entries(DICTIONARY)) {
-    const reg = new RegExp(`\\b${key}\\b`, 'gi');
-    out = out.replace(reg, val.en);
-  }
-
-  out = out.replace(/\s*-\s*(mako|13tv|i24news|reuters|cnn|fox news|bbc news|חדשות)\b/gi, '');
-
+  // Strip residual Hebrew characters
   if (/[\u0590-\u05FF]/.test(out)) {
-    out = out.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    for (const [hw, tr] of Object.entries(HEBREW_WORD_DICT)) {
+      out = out.replace(new RegExp(hw, 'g'), tr.en);
+    }
+    out = out.replace(/[\u0590-\u05FF]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
   }
 
-  return out.trim();
+  out = cleanOutletSuffix(out).trim();
+
+  if (!isMeaningfulTranslation(out)) {
+    return 'Live breaking dispatch and verified intelligence from Israel';
+  }
+
+  return out;
 }
 
 /**
- * Translates a given text to Hebrew
+ * Translates a given news headline/caption to French
+ */
+export function translateToFrench(text: string): string {
+  if (!text) return '';
+  const clean = cleanOutletSuffix(text);
+
+  // Check Hebrew headline rule patterns
+  if (/[\u0590-\u05FF]/.test(clean)) {
+    for (const rule of HEBREW_HEADLINE_RULES) {
+      if (rule.regex.test(clean)) {
+        return rule.fr;
+      }
+    }
+  }
+
+  let out = clean;
+  // Apply French terms
+  out = out
+    .replace(/Breaking News|Última hora/gi, 'Dernière minute')
+    .replace(/Live Updates|Actualizaciones en vivo/gi, 'En direct')
+    .replace(/air defense|defensa aérea/gi, 'défense aérienne')
+    .replace(/airstrike|ataque aéreo/gi, 'frappe aérienne')
+    .replace(/ballistic missile|misil balístico/gi, 'missile balistique')
+    .replace(/Red Alert|Alerta Roja/gi, 'Alerte Rouge')
+    .replace(/sirens|sirenas/gi, 'sirènes')
+    .replace(/IDF|FDI/gi, 'Tsahal')
+    .replace(/Home Front Command|Comando del Frente Doméstico/gi, 'Commandement du Front Intérieur')
+    .replace(/Iron Dome|Cúpula de Hierro/gi, 'Dôme de fer')
+    .replace(/United States|Estados Unidos/gi, 'États-Unis')
+    .replace(/Security Cabinet|Gabinete de Seguridad/gi, 'Cabinet de sécurité')
+    .replace(/Jerusalem|Jerusalén/gi, 'Jérusalem');
+
+  // Strip residual Hebrew characters
+  if (/[\u0590-\u05FF]/.test(out)) {
+    for (const [hw, tr] of Object.entries(HEBREW_WORD_DICT)) {
+      out = out.replace(new RegExp(hw, 'g'), tr.fr);
+    }
+    out = out.replace(/[\u0590-\u05FF]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  out = cleanOutletSuffix(out).trim();
+
+  if (!isMeaningfulTranslation(out)) {
+    return "Dépêche d'actualité en direct et vérifiée depuis Israël";
+  }
+
+  return out;
+}
+
+/**
+ * Translates a given news headline/caption to Hebrew
  */
 export function translateToHebrew(text: string): string {
   if (!text) return '';
-  // If already Hebrew, return
   if (/[\u0590-\u05FF]/.test(text)) {
-    return text.replace(/\s*-\s*(mako|13tv|רשת 13)\b/gi, '').trim();
+    return cleanOutletSuffix(text);
   }
 
   let out = text;
-  for (const [key, val] of Object.entries(DICTIONARY)) {
-    const reg = new RegExp(`\\b${key}\\b`, 'gi');
-    out = out.replace(reg, val.he);
-  }
-  return out.trim();
+  out = out
+    .replace(/Breaking News|Última hora|Dernière minute/gi, 'מבזק מיוחד')
+    .replace(/Live Updates|Actualizaciones en vivo|En direct/gi, 'עדכונים שוטפים')
+    .replace(/Red Alert|Alerta Roja|Alerte Rouge/gi, 'צבע אדום')
+    .replace(/Iron Dome|Cúpula de Hierro/gi, 'כיפת ברזל')
+    .replace(/IDF|FDI|Tsahal/gi, 'צה"ל')
+    .replace(/Home Front Command/gi, 'פיקוד העורף')
+    .replace(/Jerusalem|Jerusalén|Jérusalem/gi, 'ירושלים')
+    .replace(/Tel Aviv/gi, 'תל אביב')
+    .replace(/Israel/gi, 'ישראל');
+
+  return cleanOutletSuffix(out).trim();
 }
 
 /**

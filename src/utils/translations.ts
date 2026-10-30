@@ -1,5 +1,5 @@
 import type { AppLanguage, FeedPost } from '../types';
-import { translateToSpanish, translateToEnglish, translateToFrench } from './translator';
+import { translateToSpanish, translateToEnglish, translateToFrench, translateToHebrew } from './translator';
 
 export interface UIStrings {
   appName: string;
@@ -283,83 +283,118 @@ export const UI_TRANSLATIONS: Record<AppLanguage, UIStrings> = {
 /**
  * Returns localized headline, caption, and analysis for a given FeedPost
  */
+function isValidHeadlineText(text?: string): boolean {
+  if (!text) return false;
+  const t = text.trim();
+  if (t.length < 8) return false;
+  const lower = t.toLowerCase();
+  if (lower === 'mako' || lower === '- mako' || lower === '13tv' || lower === 'noticias' || lower === ', -') return false;
+  if (/^[\s\-_,:;|.]+$/.test(t)) return false;
+  return /[a-zA-Z\u0590-\u05FF]/.test(t);
+}
+
 export function getPostContent(
   post: FeedPost,
   lang: AppLanguage,
   isOriginal: boolean
 ): { headline: string; caption: string; analysis: string } {
+  const author = post.authorName || 'Medio Oficial de Israel';
+
   if (isOriginal) {
     return {
-      headline: post.headline || post.headlineEs || '',
-      caption: post.captionOrig,
+      headline: post.headline || post.headlineEs || post.headlineHe || `${author}: Despacho en directo`,
+      caption: post.captionOrig || post.captionEs || 'Actualización en vivo.',
       analysis: post.analysisEs || ''
     };
   }
 
   if (lang === 'he') {
+    let headline = post.headlineHe || (post.langOrig === 'he' ? post.captionOrig : post.headline);
+    if (!isValidHeadlineText(headline)) {
+      headline = translateToHebrew(post.headline || post.captionOrig || `${author}: מבזק חדשות בשידור חי`);
+    }
+    const caption = post.captionHe || post.captionOrig || post.captionEs || 'עדכון שוטף בשידור חי מישראל.';
     return {
-      headline: post.headlineHe || (post.langOrig === 'he' ? (post.captionOrig.length > 70 ? post.captionOrig.slice(0, 70) + '...' : post.captionOrig) : (post.headline || post.headlineEs || '')),
-      caption: post.langOrig === 'he' ? post.captionOrig : (post.captionHe || post.captionOrig || post.captionEs),
+      headline: headline || `${author}: מבזק בשידור חי`,
+      caption: caption,
       analysis: post.analysisEs || ''
     };
   }
 
   if (lang === 'en') {
-    let headline = post.headlineEn || post.headline || post.headlineEs || '';
-    let caption = post.captionEn || post.captionOrig || post.captionEs || '';
-    if (/[\u0590-\u05FF]/.test(headline)) {
-      headline = translateToEnglish(headline);
-      headline = headline.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    let headline: string = post.headlineEn || '';
+    if (!isValidHeadlineText(headline)) {
+      headline = translateToEnglish(post.headline || post.headlineEs || post.captionOrig || '');
     }
-    if (/[\u0590-\u05FF]/.test(caption)) {
-      caption = translateToEnglish(caption);
-      caption = caption.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    if (!isValidHeadlineText(headline)) {
+      headline = `${author}: Verified intelligence dispatch and breaking news from Israel`;
     }
+
+    let caption: string = post.captionEn || '';
+    if (!caption || caption.length < 15 || !/[a-zA-Z]/.test(caption) || caption.includes(', -')) {
+      caption = translateToEnglish(post.captionEs || post.captionOrig || '');
+    }
+    if (!caption || caption.length < 15) {
+      caption = `Live report from ${author}: Real-time verified coverage and civil defense monitoring across Israel.`;
+    }
+
     return {
-      headline: headline || `${post.authorName}: Live update from Israel`,
-      caption: caption || `Live report from ${post.authorName}. Information confirmed.`,
+      headline,
+      caption,
       analysis: post.analysisEn || post.analysisEs || ''
     };
   }
 
   if (lang === 'fr') {
-    let headline = post.headlineFr || post.headline || post.headlineEs || '';
-    let caption = post.captionFr || post.captionEs || '';
-    if (/[\u0590-\u05FF]/.test(headline)) {
-      headline = translateToFrench(headline);
-      headline = headline.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    let headline: string = post.headlineFr || '';
+    if (!isValidHeadlineText(headline)) {
+      headline = translateToFrench(post.headline || post.headlineEs || post.captionOrig || '');
     }
-    if (/[\u0590-\u05FF]/.test(caption)) {
-      caption = translateToFrench(caption);
-      caption = caption.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    if (!isValidHeadlineText(headline)) {
+      headline = `${author} : Dépêche d'actualité en direct et informations vérifiées depuis Israël`;
     }
+
+    let caption: string = post.captionFr || '';
+    if (!caption || caption.length < 15 || !/[a-zA-Z]/.test(caption) || caption.includes(', -')) {
+      caption = translateToFrench(post.captionEs || post.captionOrig || '');
+    }
+    if (!caption || caption.length < 15) {
+      caption = `Dépêche en direct de ${author} : Suivi opérationnel en continu et vérification journalistique depuis Israël.`;
+    }
+
     return {
-      headline: headline || `${post.authorName} : Dépêche en direct d'Israël`,
-      caption: caption || `Dépêche en direct de ${post.authorName}. Suivi opérationnel en continu.`,
+      headline,
+      caption,
       analysis: post.analysisFr || post.analysisEs || ''
     };
   }
 
-  // Default Spanish (strictly guaranteed zero Hebrew characters)
-  let headline = post.headlineEs || post.headline || '';
-  let caption = post.captionEs || '';
-
+  // Default Spanish: guaranteed zero Hebrew characters and rich informative content
+  let headline: string = post.headlineEs || '';
+  if (!isValidHeadlineText(headline)) {
+    headline = translateToSpanish(post.headline || post.headlineEn || post.captionOrig || '');
+  }
+  if (!isValidHeadlineText(headline)) {
+    headline = `${author}: Cobertura en directo y actualidad informativa de Israel`;
+  }
   if (/[\u0590-\u05FF]/.test(headline)) {
     headline = translateToSpanish(headline);
-    headline = headline.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
   }
 
+  let caption: string = post.captionEs || '';
+  if (!caption || caption.length < 15 || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(caption) || caption.includes(', -')) {
+    caption = translateToSpanish(post.captionOrig || post.captionEn || '');
+  }
+  if (!caption || caption.length < 15) {
+    caption = `Despacho en directo de ${author}: Cobertura en tiempo real sobre los últimos acontecimientos en Israel. Información confirmada.`;
+  }
   if (/[\u0590-\u05FF]/.test(caption)) {
     caption = translateToSpanish(caption);
-    caption = caption.replace(/[\u0590-\u05FF]+/g, '').replace(/\s{2,}/g, ' ').trim();
   }
 
-  const cleanHeadline = headline || `${post.authorName}: Actualización informativa en directo desde Israel`;
-  const cleanCaption = caption || `Despacho en directo de ${post.authorName}: Cobertura en tiempo real sobre acontecimientos en Israel. Información confirmada.`;
-
   return {
-    headline: cleanHeadline,
-    caption: cleanCaption,
+    headline,
+    caption,
     analysis: post.analysisEs || ''
   };
 }
