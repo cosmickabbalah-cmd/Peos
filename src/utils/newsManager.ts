@@ -228,24 +228,30 @@ export async function fetchLatestNews(existingPosts: FeedPost[] = []): Promise<N
       const data = await res.json();
 
       if (data && data.hasNew && Array.isArray(data.newPosts) && data.newPosts.length > 0) {
-        const candidate = data.newPosts[0] as FeedPost;
-        const candidateId = candidate.id.toLowerCase();
-        const candidateKey = getNewsCanonicalKey(candidate);
+        const uniqueCandidates: FeedPost[] = [];
 
-        // Strict verification: ensure it wasn't already in known set
-        if (!knownIds.has(candidateId) && !knownKeys.has(candidateKey)) {
-          recordDeliveredNewsKey(candidateId);
-          recordDeliveredNewsKey(candidateKey);
+        for (const post of data.newPosts) {
+          const candidate = post as FeedPost;
+          const candidateId = candidate.id.toLowerCase();
+          const candidateKey = getNewsCanonicalKey(candidate);
 
+          if (!knownIds.has(candidateId) && !knownKeys.has(candidateKey)) {
+            recordDeliveredNewsKey(candidateId);
+            recordDeliveredNewsKey(candidateKey);
+            uniqueCandidates.push(candidate);
+          }
+        }
+
+        if (uniqueCandidates.length > 0) {
           return {
             hasNew: true,
-            newCount: 1,
-            newPosts: [candidate],
+            newCount: uniqueCandidates.length,
+            newPosts: uniqueCandidates,
             latestUpdateTimestamp: timeFormatted,
             channelsReport: data.channelsReport || fallbackChannelsReport,
             checkedCount: data.checkedCount || 9,
-            unchangedChannelsCount: data.unchangedChannelsCount || 8,
-            auditSummary: data.auditSummary || `Canal verificado: 1 nueva noticia en ${candidate.authorName}`
+            unchangedChannelsCount: Math.max(0, (data.checkedCount || 9) - uniqueCandidates.length),
+            auditSummary: data.auditSummary || `Canales verificados: ${uniqueCandidates.length} noticias en vivo actualizadas`
           };
         }
       }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Volume2, VolumeX, Bell, BellOff, Filter, Globe, Clock, Calendar } from 'lucide-react';
+import { ShieldAlert, Volume2, VolumeX, Bell, BellOff, Filter, Globe, Clock, Calendar, RotateCw } from 'lucide-react';
 import type { AppLanguage } from '../types';
 import { UI_TRANSLATIONS } from '../utils/translations';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -49,15 +49,18 @@ export const HeaderTopBar: React.FC<HeaderTopBarProps> = ({
   const loc = localeMap[appLanguage] || 'es-ES';
 
   const dateFormatted = d.toLocaleDateString(loc, {
+    timeZone: 'Asia/Jerusalem',
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
   const timeFormatted = d.toLocaleTimeString(loc, {
+    timeZone: 'Asia/Jerusalem',
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
+    hour12: false
   });
   const capitalizedDate = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
 
@@ -94,6 +97,18 @@ export const HeaderTopBar: React.FC<HeaderTopBarProps> = ({
                 <span className="text-emerald-400 font-extrabold">{timeFormatted}</span>
                 <span className="text-[10px] text-neutral-400 font-normal hidden sm:inline">(Hora oficial)</span>
               </span>
+
+              <button
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  window.location.reload();
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-[11px] border border-emerald-400 shadow-sm transition-all cursor-pointer"
+                title="Actualizar toda la aplicación como recarga de navegador"
+              >
+                <RotateCw className="w-3 h-3" />
+                <span>Actualizar</span>
+              </button>
             </div>
           </div>
 

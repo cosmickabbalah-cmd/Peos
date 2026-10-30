@@ -6,6 +6,20 @@ import {
   translateToHebrew
 } from '../src/utils/translator.ts';
 
+export function formatIsraelOfficialTime(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString('es-ES', {
+      timeZone: 'Asia/Jerusalem',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch {
+    const hh = ((date.getUTCHours() + 2) % 24).toString().padStart(2, '0');
+    const mm = date.getUTCMinutes().toString().padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+}
 
 export interface ChannelMeta {
   id: 'mako' | 'ch13' | 'i24news' | 'standwithus' | 'bbc' | 'cnn' | 'foxnews' | 'reuters' | 'telegram' | string;
@@ -533,9 +547,7 @@ async function fetchRssFeed(url: string, channel: ChannelMeta): Promise<FeedPost
 
       const parsedDate = rawDate ? new Date(rawDate) : new Date();
       const createdAt = isNaN(parsedDate.getTime()) ? Date.now() : parsedDate.getTime();
-      const hh = parsedDate.getHours().toString().padStart(2, '0');
-      const mm = parsedDate.getMinutes().toString().padStart(2, '0');
-      const timeStr = `${hh}:${mm} (Hora oficial)`;
+      const timeStr = `${formatIsraelOfficialTime(new Date(createdAt))} (Hora oficial)`;
 
       const threatCategory = detectThreatCategory(title + ' ' + desc);
       const id = `live-${channel.id}-${canonicalFingerprint(title)}-${createdAt}`;
@@ -625,8 +637,7 @@ async function scrapeDirectHtmlFlashes(channel: ChannelMeta): Promise<FeedPost[]
         const translations = await translateHebrewPost(cleanText, '', channel.name);
         const threatCategory = detectThreatCategory(cleanText);
         const createdAt = now.getTime() - posts.length * 90000;
-        const hh = now.getHours().toString().padStart(2, '0');
-        const mm = now.getMinutes().toString().padStart(2, '0');
+        const timeStr = `${formatIsraelOfficialTime(new Date(createdAt))} (Hora oficial)`;
 
         posts.push({
           id: `html-mako-${canonicalFingerprint(cleanText)}`,
@@ -636,7 +647,7 @@ async function scrapeDirectHtmlFlashes(channel: ChannelMeta): Promise<FeedPost[]
           verified: true,
           badgeType: channel.badgeType,
           location: channel.defaultLocation,
-          timestamp: `${hh}:${mm} (Hora oficial)`,
+          timestamp: timeStr,
           createdAt,
           images: [],
           headline: translations.headlineEs,
@@ -682,8 +693,7 @@ async function scrapeDirectHtmlFlashes(channel: ChannelMeta): Promise<FeedPost[]
         const translations = await translateHebrewPost(cleanText, '', channel.name);
         const threatCategory = detectThreatCategory(cleanText);
         const createdAt = now.getTime() - posts.length * 120000;
-        const hh = now.getHours().toString().padStart(2, '0');
-        const mm = now.getMinutes().toString().padStart(2, '0');
+        const timeStr = `${formatIsraelOfficialTime(new Date(createdAt))} (Hora oficial)`;
 
         posts.push({
           id: `html-ch13-${canonicalFingerprint(cleanText)}`,
@@ -693,7 +703,7 @@ async function scrapeDirectHtmlFlashes(channel: ChannelMeta): Promise<FeedPost[]
           verified: true,
           badgeType: channel.badgeType,
           location: channel.defaultLocation,
-          timestamp: `${hh}:${mm} (Hora oficial)`,
+          timestamp: timeStr,
           createdAt,
           images: [],
           headline: translations.headlineEs,
@@ -801,7 +811,31 @@ export function getAllCachedLivePosts(): FeedPost[] {
   for (const [, posts] of livePostsCache.entries()) {
     all.push(...posts);
   }
-  return all.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return all
+    .map((p) => {
+      if (p.createdAt && typeof p.createdAt === 'number' && p.createdAt > 0) {
+        return {
+          ...p,
+          timestamp: `${formatIsraelOfficialTime(new Date(p.createdAt))} (Hora oficial)`
+        };
+      }
+      return p;
+    })
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+/**
+ * Retrieve fresh posts from all channels, triggering a refresh if cache is cold or older than 45 seconds
+ */
+export async function getOrRefreshLivePosts(): Promise<FeedPost[]> {
+  if (livePostsCache.size === 0 || Date.now() - lastGlobalFetchTimestamp > 45000) {
+    try {
+      await refreshAllChannels();
+    } catch (e) {
+      console.warn('[LiveNewsEngine] getOrRefreshLivePosts refresh error:', e);
+    }
+  }
+  return getAllCachedLivePosts();
 }
 
 let rotationIndex = 0;
@@ -825,8 +859,7 @@ export async function handleLiveNewsCheck(
 }> {
   const now = new Date();
   const nowIso = now.toISOString();
-  const hh = now.getHours().toString().padStart(2, '0');
-  const mm = now.getMinutes().toString().padStart(2, '0');
+  const israelTimeStr = formatIsraelOfficialTime(now);
 
   const knownSet = new Set<string>();
   for (const id of knownIds) {
@@ -835,39 +868,36 @@ export async function handleLiveNewsCheck(
       knownSet.add(canonicalFingerprint(id));
     }
   }
-  for (const id of deliveredPostIds) {
-    knownSet.add(id.toLowerCase());
-    knownSet.add(canonicalFingerprint(id));
-  }
 
-  if (livePostsCache.size === 0 || Date.now() - lastGlobalFetchTimestamp > 120000) {
+  if (livePostsCache.size === 0 || Date.now() - lastGlobalFetchTimestamp > 90000) {
     await refreshAllChannels();
   }
 
   const normalizedTarget = (targetOutlet || 'all').toLowerCase().trim();
   const channelsReport: ChannelCheckReport[] = [];
-  let candidatePost: FeedPost | null = null;
-  let activeChannel: ChannelMeta = MONITORED_CHANNELS[0];
+  const newPostsFound: FeedPost[] = [];
 
   if (normalizedTarget !== 'all') {
     const found = MONITORED_CHANNELS.find((c) => c.id === normalizedTarget);
-    if (found) activeChannel = found;
+    const activeCh = found || MONITORED_CHANNELS[0];
 
-    let channelPosts = livePostsCache.get(activeChannel.id) || [];
+    let channelPosts = livePostsCache.get(activeCh.id) || [];
     if (channelPosts.length === 0) {
-      channelPosts = await refreshChannel(activeChannel.id);
+      channelPosts = await refreshChannel(activeCh.id);
     }
 
     for (const post of channelPosts) {
       const pId = post.id.toLowerCase();
       const pFp = canonicalFingerprint(post.captionOrig || post.headlineEs || '');
       if (!knownSet.has(pId) && !knownSet.has(pFp)) {
-        candidatePost = post;
-        break;
+        newPostsFound.push(post);
+        knownSet.add(pId);
+        knownSet.add(pFp);
+        if (newPostsFound.length >= 6) break;
       }
     }
   } else {
-    // Check ALL channels across Israel to see if any has genuinely new news!
+    // Check all channels across Israel for fresh news
     for (const ch of MONITORED_CHANNELS) {
       let channelPosts = livePostsCache.get(ch.id) || [];
       if (channelPosts.length === 0) {
@@ -878,48 +908,43 @@ export async function handleLiveNewsCheck(
         const pId = post.id.toLowerCase();
         const pFp = canonicalFingerprint(post.captionOrig || post.headlineEs || '');
         if (!knownSet.has(pId) && !knownSet.has(pFp)) {
-          candidatePost = post;
-          activeChannel = ch;
-          break;
+          newPostsFound.push(post);
+          knownSet.add(pId);
+          knownSet.add(pFp);
+          if (newPostsFound.length >= 6) break;
         }
       }
-      if (candidatePost) break;
+      if (newPostsFound.length >= 6) break;
     }
-  }
-
-  // If candidatePost is found, record it so it will not repeat
-  if (candidatePost) {
-    deliveredPostIds.add(candidatePost.id.toLowerCase());
-    deliveredPostIds.add(canonicalFingerprint(candidatePost.captionOrig || candidatePost.headlineEs || ''));
   }
 
   // Build report for all channels
   for (const ch of MONITORED_CHANNELS) {
-    const isTarget = candidatePost ? ch.id === activeChannel.id : false;
+    const chPost = newPostsFound.find((p) => p.sourceOutlet === ch.id);
     channelsReport.push({
       channelId: ch.id,
       channelName: ch.name,
       icon: ch.icon,
       checkedAt: nowIso,
-      hasNew: isTarget && !!candidatePost,
-      statusMessage: isTarget && candidatePost
-        ? `Información actualizada a las ${hh}:${mm}`
+      hasNew: !!chPost,
+      statusMessage: chPost
+        ? `Información actualizada a las ${israelTimeStr}`
         : 'Canal verificado al minuto (enlace en vivo activo)',
-      newPostId: isTarget && candidatePost ? candidatePost.id : undefined,
-      newHeadline: isTarget && candidatePost ? candidatePost.headlineEs : undefined
+      newPostId: chPost ? chPost.id : undefined,
+      newHeadline: chPost ? chPost.headlineEs : undefined
     });
   }
 
   return {
     success: true,
-    hasNew: !!candidatePost,
-    newPosts: candidatePost ? [candidatePost] : [],
+    hasNew: newPostsFound.length > 0,
+    newPosts: newPostsFound,
     channelsReport,
     checkedCount: MONITORED_CHANNELS.length,
-    unchangedChannelsCount: candidatePost ? MONITORED_CHANNELS.length - 1 : MONITORED_CHANNELS.length,
-    auditSummary: candidatePost
-      ? `${activeChannel.name}: Noticia en directo de Israel confirmada a las ${hh}:${mm}`
-      : `Revisión completada: Los ${MONITORED_CHANNELS.length} canales oficiales de Israel están al día. No se detectaron noticias nuevas a las ${hh}:${mm}.`,
+    unchangedChannelsCount: Math.max(0, MONITORED_CHANNELS.length - newPostsFound.length),
+    auditSummary: newPostsFound.length > 0
+      ? `Canales oficiales de Israel: ${newPostsFound.length} nuevas noticias verificadas a las ${israelTimeStr}`
+      : `Revisión completada: Los ${MONITORED_CHANNELS.length} canales oficiales de Israel están al día. No se detectaron noticias nuevas a las ${israelTimeStr}.`,
     timestamp: nowIso
   };
 }

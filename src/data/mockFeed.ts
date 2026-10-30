@@ -1,5 +1,22 @@
 import type { FeedPost, StoryItem } from '../types';
 
+export function getIsraelTimeString(minutesAgo: number = 0): string {
+  const d = new Date(Date.now() - minutesAgo * 60000);
+  try {
+    const time = d.toLocaleTimeString('es-ES', {
+      timeZone: 'Asia/Jerusalem',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    return `${time} (Hora oficial)`;
+  } catch {
+    const hh = ((d.getUTCHours() + 2) % 24).toString().padStart(2, '0');
+    const mm = d.getUTCMinutes().toString().padStart(2, '0');
+    return `${hh}:${mm} (Hora oficial)`;
+  }
+}
+
 export const INITIAL_STORIES: StoryItem[] = [
   {
     id: 'story-standwithus',
@@ -27,7 +44,7 @@ export const INITIAL_STORIES: StoryItem[] = [
     location: 'mako.co.il/news-dailynews',
     mediaUrl: '/src/assets/images/n12_newsroom_broadcast_1792616522579.jpg',
     caption: 'Mako Noticias (Canal 12): El gabinete de seguridad evalúa la situación en la Kirya de Tel Aviv. Reporte especial de Nir Dvori sobre la preparación integral de la defensa aérea.',
-    time: '12:35 (Hora oficial)'
+    time: getIsraelTimeString(4)
   },
   {
     id: 'story-i24',
@@ -40,7 +57,7 @@ export const INITIAL_STORIES: StoryItem[] = [
     location: 'i24news.tv/en',
     mediaUrl: '/src/assets/images/air_defense_interception_1792615715996.jpg',
     caption: 'Live from Jaffa Studios: IAF long-range fighter jet formations conduct deterrence sorties over regional perimeter.',
-    time: '12:24 (Hora oficial)'
+    time: getIsraelTimeString(12)
   },
   {
     id: 'story-13tv',
@@ -53,7 +70,7 @@ export const INITIAL_STORIES: StoryItem[] = [
     location: '13tv.co.il',
     mediaUrl: '/src/assets/images/satellite_base_intel_1792615717932.jpg',
     caption: 'Canal 13 Noticias: El analista militar y de seguridad Alon Ben-David detalla las evaluaciones de inteligencia sobre la protección estratégica de Israel.',
-    time: '12:15 (Hora oficial)'
+    time: getIsraelTimeString(21)
   },
   {
     id: 'story-cnn',
@@ -66,7 +83,7 @@ export const INITIAL_STORIES: StoryItem[] = [
     location: 'edition.cnn.com',
     mediaUrl: '/src/assets/images/carrier_strike_group_1792615718431.jpg',
     caption: 'CNN Live from the Pentagon: U.S. CENTCOM destroyers positioned to intercept ballistic trajectories targeting Israel.',
-    time: '12:03 (Hora oficial)'
+    time: getIsraelTimeString(32)
   },
   {
     id: 'story-fox',
@@ -79,7 +96,7 @@ export const INITIAL_STORIES: StoryItem[] = [
     location: 'foxnews.com',
     mediaUrl: '/src/assets/images/carrier_strike_group_1792615718431.jpg',
     caption: 'Fox News Alert: U.S. Navy Carrier Strike Group maintaining carrier air patrol readiness in Arabian Sea and Gulf of Oman.',
-    time: '11:50 (Hora oficial)'
+    time: getIsraelTimeString(43)
   },
   {
     id: 'story-reuters',
@@ -92,7 +109,7 @@ export const INITIAL_STORIES: StoryItem[] = [
     location: 'reuters.com',
     mediaUrl: '/src/assets/images/n12_newsroom_broadcast_1792616522579.jpg',
     caption: 'Reuters Wire: Diplomatic backchannel through Swiss embassy activated between Washington and Tehran amid alert.',
-    time: '11:37 (Hora oficial)'
+    time: getIsraelTimeString(55)
   }
 ];
 
@@ -105,8 +122,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Jerusalén / Red WhatsApp Oficial',
-    timestamp: '12:40 (Hora oficial)',
-    createdAt: Date.now() - 60000,
+    timestamp: getIsraelTimeString(2),
+    createdAt: Date.now() - 2 * 60000,
     sourceOutlet: 'standwithus',
     sourceUrl: 'https://www.standwithus.com/',
     whatsappUrl: 'https://whatsapp.com/channel/0029Va7oX9aDjiOXw6o30N1o',
@@ -157,8 +174,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'GOV',
     location: 'Knesset, Jerusalén',
-    timestamp: '12:35 (Hora oficial)',
-    createdAt: Date.now() - 120000,
+    timestamp: getIsraelTimeString(7),
+    createdAt: Date.now() - 7 * 60000,
     sourceOutlet: 'mako',
     sourceUrl: 'https://www.mako.co.il/news-politics',
     headline: 'Knesset: Plenario aprueba paquete presupuestario de resiliencia nacional e inversiones clave para el norte y el sur',
@@ -197,8 +214,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Silicon Wadi, Tel Aviv & Herzliya',
-    timestamp: '12:28 (Hora oficial)',
-    createdAt: Date.now() - 180000,
+    timestamp: getIsraelTimeString(14),
+    createdAt: Date.now() - 14 * 60000,
     sourceOutlet: 'i24news',
     sourceUrl: 'https://www.i24news.tv/en/news/israel/technology-science',
     headline: 'High-Tech Israelí: Nueva generación de aceleradores de IA y ciberdefensa levanta 850M$ en Silicon Wadi',
@@ -237,8 +254,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'GOV',
     location: 'Banco de Israel, Jerusalén & Bolsa TASE Tel Aviv',
-    timestamp: '12:15 (Hora oficial)',
-    createdAt: Date.now() - 240000,
+    timestamp: getIsraelTimeString(22),
+    createdAt: Date.now() - 22 * 60000,
     sourceOutlet: 'ch13',
     sourceUrl: 'https://13tv.co.il/',
     headline: 'Banco de Israel: El Shekel se fortalece frente al dólar y el euro mientras la inflación interanual se modera al 2.6%',
@@ -277,8 +294,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'GOV',
     location: 'Centro Médico Sheba, Tel HaShomer',
-    timestamp: '12:05 (Hora oficial)',
-    createdAt: Date.now() - 300000,
+    timestamp: getIsraelTimeString(30),
+    createdAt: Date.now() - 30 * 60000,
     sourceOutlet: 'mako',
     sourceUrl: 'https://www.mako.co.il/news-israel',
     headline: 'Medicina de Vanguardia: Investigadores de Sheba y Hadassah logran remisión del 88% en nuevo ensayo de terapia celular',
@@ -317,8 +334,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Haifa & Alta Galilea',
-    timestamp: '11:55 (Hora oficial)',
-    createdAt: Date.now() - 360000,
+    timestamp: getIsraelTimeString(38),
+    createdAt: Date.now() - 38 * 60000,
     sourceOutlet: 'ch13',
     sourceUrl: 'https://13tv.co.il/',
     headline: 'Región Norte: Inauguran parque agro-tecnológico en Galilea y modernizan terminal automatizada del Puerto de Haifa',
@@ -357,8 +374,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Jerusalén Capital',
-    timestamp: '11:42 (Hora oficial)',
-    createdAt: Date.now() - 420000,
+    timestamp: getIsraelTimeString(47),
+    createdAt: Date.now() - 47 * 60000,
     sourceOutlet: 'reuters',
     sourceUrl: 'https://www.reuters.com/',
     headline: 'Jerusalén: Arqueólogos descubren inscripción del periodo del Primer Templo en la Ciudad de David',
@@ -397,8 +414,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Beersheba & Néguev',
-    timestamp: '11:30 (Hora oficial)',
-    createdAt: Date.now() - 480000,
+    timestamp: getIsraelTimeString(56),
+    createdAt: Date.now() - 56 * 60000,
     sourceOutlet: 'i24news',
     sourceUrl: 'https://www.i24news.tv/en',
     headline: 'Región Sur: Beersheba inaugura el mayor campus de defensa cibernética del Néguev junto a la Universidad Ben-Gurión',
@@ -437,8 +454,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Tel Aviv (Menora Mivtachim Arena)',
-    timestamp: '11:18 (Hora oficial)',
-    createdAt: Date.now() - 540000,
+    timestamp: getIsraelTimeString(66),
+    createdAt: Date.now() - 66 * 60000,
     sourceOutlet: 'mako',
     sourceUrl: 'https://www.mako.co.il/news-israel',
     headline: 'Deportes: Triunfo vibrante de Maccabi Tel Aviv en la Euroliga ante 11.000 aficionados en el Menora Arena',
@@ -477,8 +494,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'GOV',
     location: 'Comando del Frente Doméstico / Ramla',
-    timestamp: '11:05 (Hora oficial)',
-    createdAt: Date.now() - 600000,
+    timestamp: getIsraelTimeString(78),
+    createdAt: Date.now() - 78 * 60000,
     sourceOutlet: 'telegram',
     sourceUrl: 'https://t.me/s/tzevaadom',
     headline: 'Pikud HaOref: El sistema nacional de difusión celular Cell Broadcast opera con plena eficacia en todo Israel',
@@ -517,8 +534,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'GOV',
     location: 'Tel Aviv, Cuartel Kirya',
-    timestamp: '10:45 (Hora oficial)',
-    createdAt: Date.now() - 660000,
+    timestamp: getIsraelTimeString(90),
+    createdAt: Date.now() - 90 * 60000,
     sourceOutlet: 'mako',
     sourceUrl: 'https://www.mako.co.il/news-israel',
     headline: 'Gabinete de Seguridad: Evaluación estratégica sobre la defensa integral de infraestructuras energéticas de Israel',
@@ -557,8 +574,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Tel Aviv & Abu Dabi',
-    timestamp: '10:30 (Hora oficial)',
-    createdAt: Date.now() - 720000,
+    timestamp: getIsraelTimeString(105),
+    createdAt: Date.now() - 105 * 60000,
     sourceOutlet: 'i24news',
     sourceUrl: 'https://www.i24news.tv/en',
     headline: 'Acuerdos de Abraham: Comercio bilateral entre Israel y los Emiratos Árabes Unidos supera los 3.200 millones de dólares',
@@ -597,8 +614,8 @@ export const INITIAL_POSTS: FeedPost[] = [
     verified: true,
     badgeType: 'OSINT',
     location: 'Puertos de Haifa y Ashdod / Aeropuerto Ben Gurión',
-    timestamp: '10:10 (Hora oficial)',
-    createdAt: Date.now() - 780000,
+    timestamp: getIsraelTimeString(120),
+    createdAt: Date.now() - 120 * 60000,
     sourceOutlet: 'reuters',
     sourceUrl: 'https://www.reuters.com/',
     headline: 'Reuters: Puertos de Haifa, Ashdod y Aeropuerto Ben Gurión mantienen ritmo comercial al 100% de capacidad',

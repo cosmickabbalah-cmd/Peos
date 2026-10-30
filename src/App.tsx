@@ -31,7 +31,22 @@ export default function App() {
     }
     return 'es';
   });
-  const [posts, setPosts] = useState<FeedPost[]>(() => sortPostsByRecency(INITIAL_POSTS));
+  const [posts, setPosts] = useState<FeedPost[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('warfeed_live_posts_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return sortPostsByRecency(parsed);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return sortPostsByRecency(INITIAL_POSTS);
+  });
   const [stories, setStories] = useState<StoryItem[]>(INITIAL_STORIES);
   const [activeAlerts, setActiveAlerts] = useState<MissileAlert[]>([]);
   const [alertHistory, setAlertHistory] = useState<MissileAlert[]>([]);
@@ -225,14 +240,15 @@ export default function App() {
         setStories(data.stories);
       }
       if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
-        setPosts((current) => {
-          const seenKeys = new Set(current.map((p) => getNewsCanonicalKey(p)));
-          const uniqueNew = (data.posts as FeedPost[]).filter(
-            (p) => !seenKeys.has(getNewsCanonicalKey(p))
-          );
-          if (uniqueNew.length === 0) return current;
-          return sortPostsByRecency([...uniqueNew, ...current]);
-        });
+        const sorted = sortPostsByRecency(data.posts as FeedPost[]);
+        setPosts(sorted);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem('warfeed_live_posts_cache', JSON.stringify(sorted));
+          } catch {
+            // ignore
+          }
+        }
       }
       setLastUpdatedTimestamp(Date.now());
     } catch {

@@ -137,7 +137,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
   const [selectedOutlet, setSelectedOutlet] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [visibleCount, setVisibleCount] = useState<number>(15);
+  const [visibleCount, setVisibleCount] = useState<number>(60);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [showOriginalLang, setShowOriginalLang] = useState<Record<string, boolean>>({});
   const [showAnalysis, setShowAnalysis] = useState<Record<string, boolean>>({});
@@ -208,126 +208,69 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
     return `${dateStr} - ${timeStr}`;
   };
 
-  const formatOfficialTimestamp = (timestamp: string, lang: AppLanguage) => {
+  const formatOfficialTimestamp = (postOrTime: FeedPost | string, lang: AppLanguage) => {
+    if (typeof postOrTime === 'object' && postOrTime.createdAt && typeof postOrTime.createdAt === 'number' && postOrTime.createdAt > 0) {
+      const d = new Date(postOrTime.createdAt);
+      try {
+        const locale = lang === 'en' ? 'en-US' : lang === 'fr' ? 'fr-FR' : lang === 'he' ? 'he-IL' : 'es-ES';
+        const timeStr = d.toLocaleTimeString(locale, {
+          timeZone: 'Asia/Jerusalem',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+        if (lang === 'he') return `${timeStr} (שעה רשמית)`;
+        if (lang === 'en') return `${timeStr} (Official time)`;
+        if (lang === 'fr') return `${timeStr} (Heure officielle)`;
+        return `${timeStr} (Hora oficial)`;
+      } catch {
+        // fallback
+      }
+    }
+    const raw = typeof postOrTime === 'string' ? postOrTime : postOrTime.timestamp || '';
     if (lang === 'he') {
-      return timestamp.replace('(Hora oficial)', '(שעה רשמית)');
+      return raw.replace('(Hora oficial)', '(שעה רשמית)');
     }
     if (lang === 'en') {
-      return timestamp.replace('(Hora oficial)', '(Official time)');
+      return raw.replace('(Hora oficial)', '(Official time)');
     }
     if (lang === 'fr') {
-      return timestamp.replace('(Hora oficial)', '(Heure officielle)');
+      return raw.replace('(Hora oficial)', '(Heure officielle)');
     }
-    return timestamp;
+    return raw;
   };
 
-  // Function to run the 2-minute periodic channel check
-  const checkTwoMinuteUpdates = useCallback(async () => {
-    try {
-      const result = await fetchLatestNews(posts);
-      setLastUpdatedTimestamp(Date.now());
-      if (result.channelsReport && result.channelsReport.length > 0) {
-        setChannelsReport(result.channelsReport);
-      }
-      if (result.auditSummary) {
-        setAuditSummary(result.auditSummary);
-      }
-
-      // Check if ANY channel published genuinely new information
-      if (result.hasNew && result.newPosts.length > 0) {
-        const currentKeys = new Set([
-          ...posts.map((p) => p.id.toLowerCase()),
-          ...posts.map((p) => getNewsCanonicalKey(p))
-        ]);
-
-        const uniqueNew = result.newPosts.filter(
-          (p) => !currentKeys.has(p.id.toLowerCase()) && !currentKeys.has(getNewsCanonicalKey(p))
-        );
-
-        if (uniqueNew.length > 0 && onAddNewPosts) {
-          onAddNewPosts(uniqueNew);
-          const newIds = new Set(uniqueNew.map((p) => p.id));
-          setHighlightedPostIds(newIds);
-          setTimeout(() => setHighlightedPostIds(new Set()), 10000);
-          alertAudio.playLikeChime();
-          const authorTitle = uniqueNew[0].authorName || 'Medio Oficial';
-          setToastMessage(`✓ ${authorTitle}: Nueva noticia en tiempo real incorporada`);
-          setTimeout(() => setToastMessage(null), 4500);
-          setVisibleCount((prev) => Math.max(prev, 8));
-        }
-      } else {
-        // "si no es nueva no haga nada"
-        // Strict requirement: DO NOTHING TO THE FEED! Do not add or recycle any old posts.
-        setHighlightedPostIds(new Set());
-      }
-    } catch (err) {
-      console.warn('[Feed] Error checking for channel updates:', err);
-    }
-  }, [posts, onAddNewPosts]);
-
-  // 2-Minute Auto-Check Countdown Interval
+  // 2-Minute Full Application Browser Reload Interval
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          checkTwoMinuteUpdates();
-          return 120; // reset countdown to 2 minutes
+          if (typeof window !== 'undefined') {
+            window.scrollTo(0, 0);
+            window.location.reload();
+          }
+          return 120; // reset countdown
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [checkTwoMinuteUpdates]);
+  }, []);
 
-  // Handle Manual Refresh Button Click
-  const handleManualRefresh = async () => {
+  // Handle Manual Refresh Button Click: Complete browser-style reload of the whole application
+  const handleManualRefresh = () => {
     setIsRefreshing(true);
-    alertAudio.playLikeChime();
-
     try {
-      const result = await fetchLatestNews(posts);
-      setLastUpdatedTimestamp(Date.now());
-      setCountdown(120); // reset 2-minute timer on manual refresh
-      if (result.channelsReport && result.channelsReport.length > 0) {
-        setChannelsReport(result.channelsReport);
-      }
-      if (result.auditSummary) {
-        setAuditSummary(result.auditSummary);
-      }
-
-      if (result.hasNew && result.newPosts.length > 0) {
-        const currentKeys = new Set([
-          ...posts.map((p) => p.id.toLowerCase()),
-          ...posts.map((p) => getNewsCanonicalKey(p))
-        ]);
-
-        const uniqueNew = result.newPosts.filter(
-          (p) => !currentKeys.has(p.id.toLowerCase()) && !currentKeys.has(getNewsCanonicalKey(p))
-        );
-
-        if (uniqueNew.length > 0 && onAddNewPosts) {
-          onAddNewPosts(uniqueNew);
-          const newIds = new Set(uniqueNew.map((p) => p.id));
-          setHighlightedPostIds(newIds);
-          setTimeout(() => setHighlightedPostIds(new Set()), 10000);
-          const authorTitle = uniqueNew[0].authorName || 'Medio Oficial';
-          setToastMessage(`✓ ${authorTitle}: Nueva noticia incorporada al feed`);
-          setVisibleCount((prev) => Math.max(prev, 8));
-        } else {
-          // If already in feed: do nothing
-          setHighlightedPostIds(new Set());
-          setToastMessage(t.noNewInfoDoNothing);
-        }
-      } else {
-        // "si no es nueva no haga nada"
-        // Strict requirement: DO NOTHING TO THE FEED!
-        setHighlightedPostIds(new Set());
-        setToastMessage(t.noNewInfoDoNothing);
-      }
-      setTimeout(() => setToastMessage(null), 4500);
-    } finally {
-      setTimeout(() => setIsRefreshing(false), 380);
+      alertAudio.playLikeChime();
+    } catch {
+      // ignore
+    }
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+      setTimeout(() => {
+        window.location.reload();
+      }, 150);
     }
   };
 
@@ -415,11 +358,11 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
               </span>
             </div>
             <p className="text-white font-mono font-bold text-xs sm:text-sm pt-0.5 flex items-center gap-1.5 flex-wrap">
-              <span>📅 {new Date(lastUpdatedTimestamp).toLocaleDateString(appLanguage === 'he' ? 'he-IL' : appLanguage === 'en' ? 'en-US' : appLanguage === 'fr' ? 'fr-FR' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              <span>📅 {new Date(lastUpdatedTimestamp).toLocaleDateString(appLanguage === 'he' ? 'he-IL' : appLanguage === 'en' ? 'en-US' : appLanguage === 'fr' ? 'fr-FR' : 'es-ES', { timeZone: 'Asia/Jerusalem', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
               <span className="text-neutral-500">|</span>
-              <span className="text-emerald-400 font-extrabold">🕒 {new Date(lastUpdatedTimestamp).toLocaleTimeString(appLanguage === 'he' ? 'he-IL' : appLanguage === 'en' ? 'en-US' : appLanguage === 'fr' ? 'fr-FR' : 'es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+              <span className="text-emerald-400 font-extrabold">🕒 {new Date(lastUpdatedTimestamp).toLocaleTimeString(appLanguage === 'he' ? 'he-IL' : appLanguage === 'en' ? 'en-US' : appLanguage === 'fr' ? 'fr-FR' : 'es-ES', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</span>
               <span className="text-[10px] text-neutral-400 font-normal">
-                {appLanguage === 'he' ? '(שעה רשמית בישראל)' : '(Hora oficial de Israel y medios)'}
+                {appLanguage === 'he' ? '(שעה רשמית בישראל)' : '(Hora oficial de Israel)'}
               </span>
             </p>
           </div>
@@ -936,7 +879,7 @@ export const InstagramFeed: React.FC<InstagramFeedProps> = ({
                       className="text-neutral-300 font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800"
                       title={appLanguage === 'he' ? "שעה מדויקת של פרסום באתר הרשמי" : "Hora exacta de publicación en el medio oficial"}
                     >
-                      {formatOfficialTimestamp(post.timestamp, appLanguage)}
+                      {formatOfficialTimestamp(post, appLanguage)}
                     </span>
 
                     {/* Visible indicator that this is the most recent dispatch */}

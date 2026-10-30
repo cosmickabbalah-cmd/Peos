@@ -5,7 +5,9 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import {
   handleLiveNewsCheck,
-  getAllCachedLivePosts
+  getAllCachedLivePosts,
+  getOrRefreshLivePosts,
+  formatIsraelOfficialTime
 } from './server/liveNewsFeed.ts';
 
 dotenv.config();
@@ -1123,11 +1125,16 @@ app.get('/api/feed/latest', async (req: Request, res: Response) => {
 });
 
 // API: Instagram-style News & Intel Feed Data
-app.get('/api/feed', (_req: Request, res: Response) => {
-  const cachedPosts = getAllCachedLivePosts();
+app.get('/api/feed', async (_req: Request, res: Response) => {
+  let cachedPosts = getAllCachedLivePosts();
+  try {
+    cachedPosts = await getOrRefreshLivePosts();
+  } catch (err) {
+    console.warn('[Server] Error fetching or refreshing live posts:', err);
+  }
   res.json({
     success: true,
-    channelNotice: 'Conectado a canales oficiales y corresponsales verificados de Israel: StandWithUs (WhatsApp & Web), Mako/N12, חדשות 13, i24NEWS, BBC, CNN, Fox News, Reuters y Tzeva Adom',
+    channelNotice: 'Conectado a canales oficiales y corresponsales verificados de Israel: StandWithUs (WhatsApp & Web), Mako Noticias (Canal 12 / N12), Canal 13 (Reshet 13), i24NEWS, BBC, CNN, Fox News, Reuters y Tzeva Adom',
     stories: [
       {
         id: 'story-standwithus',
@@ -1146,68 +1153,68 @@ app.get('/api/feed', (_req: Request, res: Response) => {
       },
       {
         id: 'story-n12',
-        author: 'N12 חדשות',
-        handle: '@n12israel',
+        author: 'Mako Noticias (N12)',
+        handle: '@mako_noticias',
         avatar: '🔴',
-        title: 'N12 מבזק חי',
+        title: 'Mako Noticias (N12)',
         hasUnseen: true,
         priority: 'alert',
-        location: 'אולפן החדשות, תל אביב',
+        location: 'Redacción central, Tel Aviv',
         mediaUrl: '/src/assets/images/n12_newsroom_broadcast_1792616522579.jpg',
-        caption: 'מבזק מיוחד N12: הקבינט המדיני-ביטחוני מכונס בבור בקריה בתל אביב. סיקור שוטף של כל חדשות ישראל.',
-        time: '12:35 (Hora oficial)'
+        caption: 'Mako Noticias (Canal 12): El gabinete de seguridad evalúa la situación en la Kirya de Tel Aviv. Reporte especial de Nir Dvori sobre la preparación integral de la defensa aérea.',
+        time: `${formatIsraelOfficialTime(new Date(Date.now() - 4 * 60000))} (Hora oficial)`
       },
       {
         id: 'story-nir-dvori',
-        author: 'ניר דבורי (N12)',
-        handle: '@nirdvori',
+        author: 'Nir Dvori (Defensa N12)',
+        handle: '@nirdvori_n12',
         avatar: '🎙️',
-        title: 'ניר דבורי',
+        title: 'Nir Dvori (N12)',
         hasUnseen: true,
         priority: 'alert',
-        location: 'הקריה, תל אביב',
+        location: 'La Kirya, Tel Aviv',
         mediaUrl: '/src/assets/images/air_defense_interception_1792615715996.jpg',
-        caption: 'עדכון צבאי: תיאום מבצעי מלא ואינטימי בין מפקדת חיל האוויר למפקדת סנטקום (CENTCOM). סוללות חץ 3 פרוסות במלואן.',
-        time: '12:28 (Hora oficial)'
+        caption: 'Reporte Militar Especial: Coordinación operacional continua entre la Fuerza Aérea de Israel y el Comando Central de EE. UU. (CENTCOM). Baterías Arrow 3 y Cúpula de Hierro en despliegue permanente.',
+        time: `${formatIsraelOfficialTime(new Date(Date.now() - 11 * 60000))} (Hora oficial)`
       },
       {
         id: 'story-ch13',
-        author: 'חדשות 13',
-        handle: '@ch13news',
+        author: 'Canal 13 Noticias',
+        handle: '@reshet13_noticias',
         avatar: '📺',
-        title: 'חדשות 13',
+        title: 'Canal 13 Israel',
         hasUnseen: true,
         priority: 'breaking',
-        location: 'נווה אילן / תל אביב',
+        location: 'Estudios Neve Ilan / Tel Aviv',
         mediaUrl: '/src/assets/images/satellite_base_intel_1792615717932.jpg',
-        caption: 'פרסום בחדשות 13: אלון בן דוד ואור הלר מדווחים על הערכות המצב הביטחוניות והפוליטיות בישראל.',
-        time: '12:15 (Hora oficial)'
+        caption: 'Noticias Canal 13: El analista militar y de seguridad Alon Ben-David detalla las evaluaciones de inteligencia sobre la protección estratégica de Israel.',
+        time: `${formatIsraelOfficialTime(new Date(Date.now() - 19 * 60000))} (Hora oficial)`
       },
       {
         id: 'story-barak-ravid',
-        author: 'Barak Ravid (ברק רביד)',
-        handle: '@barakravid',
+        author: 'Barak Ravid (Diplomacia)',
+        handle: '@barakravid_axios',
         avatar: '🇺🇸',
         title: 'Barak Ravid',
         hasUnseen: true,
         priority: 'intel',
-        location: 'Washington / Axios',
+        location: 'Washington / Jerusalén',
         mediaUrl: '/src/assets/images/carrier_strike_group_1792615718431.jpg',
-        caption: 'Scoop via Axios: Diplomatic and political updates concerning Israel and international partners.',
-        time: '12:03 (Hora oficial)'
+        caption: 'Despacho Diplomático: Actualización estratégica sobre las conversaciones de seguridad y coordinación bilateral entre Israel y aliados internacionales.',
+        time: `${formatIsraelOfficialTime(new Date(Date.now() - 28 * 60000))} (Hora oficial)`
       },
       {
         id: 'story-cnn',
-        author: 'Oren Liebermann (CNN)',
-        handle: '@orencnn',
+        author: 'CNN Israel & Middle East',
+        handle: '@cnn_mideast',
         avatar: '🌐',
-        title: 'CNN Pentagon',
+        title: 'CNN News',
         hasUnseen: false,
         priority: 'breaking',
-        location: 'The Pentagon, VA',
+        location: 'El Pentágono / Jerusalén',
         mediaUrl: '/src/assets/images/carrier_strike_group_1792615718431.jpg',
-        caption: 'Live from the Pentagon: Defense officials confirm US naval destroyers in the Red Sea and Gulf of Oman are on 24/7 BMD intercept alert.',
-        time: '11:50 (Hora oficial)'
+        caption: 'CNN Live: Oficiales de defensa confirman el despliegue del escudo antiaéreo conjunto Aegis y radares avanzados en el Mar Rojo y Golfo de Omán.',
+        time: `${formatIsraelOfficialTime(new Date(Date.now() - 39 * 60000))} (Hora oficial)`
       }
     ],
     posts: cachedPosts
